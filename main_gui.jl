@@ -1,3 +1,5 @@
+using Random
+
 using Raylib
 using Raylib: rayvector
 
@@ -21,6 +23,8 @@ function main(par_overrides...)
     pars, args = load_parameters(args, 
         ["--gui-scale"], 
         Dict(:help => "set gui scale", :default => 1.0, :arg_type => Float64))
+
+    Random.seed!(pars.seed)
 
     model = setup_model(pars)
 #    logfile = setupLogging(simPars)

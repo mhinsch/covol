@@ -1,6 +1,9 @@
 using Parameters
 
 @with_kw mutable struct Params
+    n_steps         :: Int              = 24 * 4 * 365
+    seed            :: Int              = 42
+
     x_size          :: Int              = 100
     y_size          :: Int              = 100
     n_schools       :: Int              = 50
