@@ -6,28 +6,26 @@ const RL = Raylib
 
 include("main_util.jl")
 
-include("src/RayGUI/render.jl")
+include("src/gui/render.jl")
 
-include("src/RayGUI/SimpleGraph.jl")
-using .SimpleGraph
+using SimpleGraph
 
-function main(parOverrides...)
-#    args = copy(ARGS)
+function main(par_overrides...)
+    args = copy(ARGS)
 
-#    for pov in parOverrides
-#        push!(args, string(pov))
-#    end
+    for pov in par_overrides
+        push!(args, string(pov))
+    end
 
     # need to do that first, otherwise it blocks the GUI
-#    simPars, pars, args = loadParameters(args, 
-#        ["--gui-scale"], 
-#        Dict(:help => "set gui scale", :default => 1.0, :arg_type => Float64))
+    pars, args = load_parameters(args, 
+        ["--gui-scale"], 
+        Dict(:help => "set gui scale", :default => 1.0, :arg_type => Float64))
 
-    pars = Params()
     model = setup_model(pars)
 #    logfile = setupLogging(simPars)
 
-    scale = 2.0 # args[:gui_scale]
+    scale = args[:gui_scale]
     screenWidth = floor(Int, 1600 * scale)
     screenHeight = floor(Int, 900 * scale)
 

@@ -1,6 +1,6 @@
 using Parameters
 
-@with_kw struct Params
+@with_kw mutable struct Params
     x_size          :: Int              = 100
     y_size          :: Int              = 100
     n_schools       :: Int              = 50

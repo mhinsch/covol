@@ -1,6 +1,3 @@
-n_instances(T) = length(instances(T))
-
-
 function remove_unsorted!(cont, obj)
     for (i, el) in enumerate(cont)
         if el == obj

@@ -3,7 +3,6 @@ offset_house(hx, hy, o, s) = (x = o.x + (hx-1) * s.x,
                     y = o.y + (hy-1) * s.y)
 
 function drawModel(model, offset, hsize)
-
     for house in model.world.map
         pos = house.pos
         # top left corner of house

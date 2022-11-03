@@ -157,3 +157,13 @@ function setup_social!(world, pars)
 
     # TODO friends
 end
+
+
+function setup_model(pars)
+    world = create_world(pars)
+    setup_transport!(world, pars)
+    setup_schedules!(world, pars)
+    create_agents!(world, pars)
+    setup_social!(world, pars)
+    Model(world, 1, 0)
+end
