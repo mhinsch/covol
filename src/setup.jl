@@ -159,11 +159,19 @@ function setup_social!(world, pars)
 end
 
 
+function initial_infected!(world, pars)
+    for i in pars.n_infected
+        rand(world.pop).immune.status = IStatus.infected
+    end
+end
+
+
 function setup_model(pars)
     world = create_world(pars)
     setup_transport!(world, pars)
     setup_schedules!(world, pars)
     create_agents!(world, pars)
     setup_social!(world, pars)
+    initial_infected!(world, pars)
     Model(world, 1, 0)
 end

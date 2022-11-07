@@ -7,6 +7,7 @@ using Raylib: rayvector
 const RL = Raylib
 
 include("main_util.jl")
+include("analysis.jl")
 
 include("src/gui/render.jl")
 
@@ -55,7 +56,7 @@ function main(par_overrides...)
 
         if !pause #&& time <= simPars.finishTime
             step!(model, pars)
-            #data = observe(Data, model)
+            data = observe(Data, model.world)
             #log_results(logfile, data)
             # add values to graph objects
             #add_value!(graph_pop, data.alive.n)
