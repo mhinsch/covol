@@ -16,13 +16,15 @@ using Parameters
     n_cars          :: Int              = 5
 
     n_agents        :: Int              = 10000
+    n_infected      :: Int              = 10
 
     walk_dist       :: Float64          = 3
     car_cap         :: Int              = 20
 
     p_encounter     :: Float64          = 0.1
     p_expose        :: Float64          = 0.1
-    p_inf           :: Vector{Float64}  = [0.1, 0.1, 0.1, 0.1]
+    p_inf           :: Vector{Float64}  = [0.01, 0.01, 0.01, 0.01]
+    p_rec           :: Float64          = 0.001
 
     # time step in minutes
     timestep        :: Int              = 15

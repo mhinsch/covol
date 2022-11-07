@@ -12,6 +12,10 @@ function step!(model, pars)
         activity!(agent, world, model.day, model.time, pars)
     end
 
+    for agent in world.pop
+        disease!(agent, pars)
+    end
+
     for house in world.map
         infection!(house, pars)
     end

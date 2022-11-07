@@ -67,6 +67,10 @@ end
 # very simplistic model for now
 function expose!(agent, pars)
     p_inf = pars.p_inf[Int(agent.immune.status)] ^ agent.risk
+
+    if rand() < p_inf
+        agent.immune.status = IStatus.infected
+    end
 end
 
 
@@ -80,6 +84,14 @@ function infection!(place, pars)
     for agent in place.present
         if agent.immune.status != IStatus.infected && rand() < prob
             expose!(agent, pars)
+        end
+    end
+end
+
+function disease!(agent, pars)
+    if agent.immune.status == IStatus.infected
+        if rand() < pars.p_rec
+            agent.immune.status = IStatus.recovered
         end
     end
 end
