@@ -114,7 +114,7 @@ function draw_graph(x_0, y_0, width, height, graphs;
     lx = x_0 + width - w
 
     for (i, l) in enumerate(labels)
-        RL.DrawText(l, lx, (i-1)*fontsize, fontsize, graphs[i].colour)
+        RL.DrawText(l, lx, y_0 + (i-1)*fontsize, fontsize, graphs[i].colour)
     end
 
 end
