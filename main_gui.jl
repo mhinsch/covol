@@ -45,10 +45,9 @@ function main(par_overrides...)
     )
 
     # create graph objects with colour
-#    graph_pop = Graph{Float64}(RL.BLUE)
-#    graph_hhs = Graph{Float64}(RL.WHITE)
-#    graph_marr = Graph{Float64}(RL.BLACK)
-#    graph_age = Graph{Float64}(RL.RED)
+    graph_ihouses = Graph{Float64}(RL.BLUE)
+    graph_ipersons = Graph{Float64}(RL.RED)
+    graph_rec = Graph{Float64}(RL.GREEN)
 
     pause = false
 #    time = Rational(simPars.startTime)
@@ -59,10 +58,9 @@ function main(par_overrides...)
             data = observe(Data, model.world)
             #log_results(logfile, data)
             # add values to graph objects
-            #add_value!(graph_pop, data.alive.n)
-            #add_value!(graph_hhs, data.hh_size.mean)
-            #add_value!(graph_marr, data.married.n)
-            #set_data!(graph_age, data.hist_age.bins, minm=0)
+            add_value!(graph_ihouses, data.n_inf_houses.n)
+            add_value!(graph_ipersons, data.n_inf.n)
+            add_value!(graph_rec, data.n_rec.n)
             h = rand(model.world.map)
             println(h.pos, ": ", h.type, " ", length(h.present))
             #println(data.hh_size.max, " ", data.alive.n, " ", data.eligible.n, " ", data.eligible2.n)
@@ -84,12 +82,19 @@ function main(par_overrides...)
         RL.EndMode2D()
 
         # draw graphs
-        #draw_graph(floor(Int, screenWidth/3), 0, floor(Int, screenWidth*2/3), screenHeight, 
-        #           [graph_pop, graph_hhs, graph_marr, graph_age], 
-        #           single_scale = false, 
-        #           labels = ["#alive", "hh size", "#married", "age"],
-        #           fontsize = floor(Int, 15 * scale))
+        draw_graph(floor(Int, screenWidth*2/3), 0, 
+                   floor(Int, screenWidth/3), floor(Int, screenHeight/2) - 10, 
+            [graph_ipersons, graph_rec],
+            single_scale = true, 
+            labels = ["infected", "recovered"],
+            fontsize = floor(Int, 15 * scale))
         
+        draw_graph(floor(Int, screenWidth*2/3), floor(Int, screenHeight/2) + 20, 
+                   floor(Int, screenWidth/3), floor(Int, screenHeight/2) - 10, 
+            [graph_ihouses],
+            single_scale = false, 
+            labels = ["inf houses"],
+            fontsize = floor(Int, 15 * scale))
 
         RL.DrawText("$(model.day):$(model.time/60)", 0, 
                     screenHeight - floor(Int, 20 * scale), 
