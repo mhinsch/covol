@@ -35,9 +35,15 @@ function travel!(agent, dest, activity, world, pars)
 
     tps = get_transports(world, agent.loc, dest, activity, pars)
 
-    # placeholder
-    # TODO assign cars
-    tp = isempty(tps) ? Nowhere : tps[1].cars[1]
+    tp = Nowhere
+
+    for t in tps, car in t.cars
+        if length(car.present) < pars.car_cap
+            tp = car
+            break
+        end
+    end
+
     change_loc!(agent, tp)
 end
 

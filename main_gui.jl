@@ -48,6 +48,7 @@ function main(par_overrides...)
     graph_ihouses = Graph{Float64}(RL.BLUE)
     graph_ipersons = Graph{Float64}(RL.RED)
     graph_rec = Graph{Float64}(RL.GREEN)
+    graph_inf_trans = Graph{Float64}(RL.PURPLE)
 
     pause = false
 #    time = Rational(simPars.startTime)
@@ -61,6 +62,7 @@ function main(par_overrides...)
             add_value!(graph_ihouses, data.n_inf_houses.n)
             add_value!(graph_ipersons, data.n_inf.n)
             add_value!(graph_rec, data.n_rec.n)
+            add_value!(graph_inf_trans, data.p_inf_transport.mean)
             h = rand(model.world.map)
             println(h.pos, ": ", h.type, " ", length(h.present))
             #println(data.hh_size.max, " ", data.alive.n, " ", data.eligible.n, " ", data.eligible2.n)
@@ -91,9 +93,9 @@ function main(par_overrides...)
         
         draw_graph(floor(Int, screenWidth*2/3), floor(Int, screenHeight/2) + 20, 
                    floor(Int, screenWidth/3), floor(Int, screenHeight/2) - 10, 
-            [graph_ihouses],
+            [graph_ihouses, graph_inf_trans],
             single_scale = false, 
-            labels = ["inf houses"],
+            labels = ["inf houses", "inf transp"],
             fontsize = floor(Int, 15 * scale))
 
         RL.DrawText("$(model.day):$(model.time/60)", 0, 
