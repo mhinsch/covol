@@ -1,4 +1,5 @@
 using Random
+using Dates
 
 using Raylib
 using Raylib: rayvector
@@ -47,8 +48,10 @@ function main(par_overrides...)
     # create graph objects with colour
     graph_ihouses = Graph{Float64}(RL.BLUE)
     graph_ipersons = Graph{Float64}(RL.RED)
-    graph_rec = Graph{Float64}(RL.GREEN)
+    graph_rec = Graph{Float64}(RL.DARKGREEN)
     graph_inf_trans = Graph{Float64}(RL.PURPLE)
+    graph_ief_mn = Graph{Float64}(RL.BLACK)
+    graph_ief_mx = Graph{Float64}(RL.WHITE)
 
     pause = false
 #    time = Rational(simPars.startTime)
@@ -63,9 +66,10 @@ function main(par_overrides...)
             add_value!(graph_ipersons, data.n_inf.n)
             add_value!(graph_rec, data.n_rec.n)
             add_value!(graph_inf_trans, data.p_inf_transport.mean)
+            add_value!(graph_ief_mn, data.ief.mean)
+            add_value!(graph_ief_mx, data.ief.max)
             h = rand(model.world.map)
-            println(h.pos, ": ", h.type, " ", length(h.present))
-            #println(data.hh_size.max, " ", data.alive.n, " ", data.eligible.n, " ", data.eligible2.n)
+            println(data.n_inf.n, " ", data.n_inf_houses.n)
         end
 
         if RL.IsKeyPressed(Raylib.KEY_SPACE)
@@ -93,12 +97,13 @@ function main(par_overrides...)
         
         draw_graph(floor(Int, screenWidth*2/3), floor(Int, screenHeight/2) + 20, 
                    floor(Int, screenWidth/3), floor(Int, screenHeight/2) - 10, 
-            [graph_ihouses, graph_inf_trans],
+            [graph_ihouses, graph_inf_trans, graph_ief_mn, graph_ief_mx],
             single_scale = false, 
-            labels = ["inf houses", "inf transp"],
+            labels = ["inf houses", "inf transp", "mean ief", "max ief"],
             fontsize = floor(Int, 15 * scale))
 
-        RL.DrawText("$(model.day):$(model.time/60)", 0, 
+        date = Date(2020) + Week(model.week) + Day(model.day)
+        RL.DrawText("$(date) $(model.time/60)", 0, 
                     screenHeight - floor(Int, 20 * scale), 
                     floor(Int, 20 * scale), RL.BLACK)
 

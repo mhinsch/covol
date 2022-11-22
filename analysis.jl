@@ -25,10 +25,15 @@ end
 
     @for transport in world.transports begin
         @stat("p_inf_transport", MVA) <| Float64(n_infected_transport(transport))
+        @stat("n_commute", SumAcc{Int}) <| sum(c->length(c.present), transport.cars)
     end
 
     @for person in world.pop begin
         @stat("n_inf", CountAcc) <| (person.immune.status == IStatus.infected)
         @stat("n_rec", CountAcc) <| (person.immune.status == IStatus.recovered)
+    end
+
+    @for inf in Iterators.filter(p->infectious(p), world.pop) begin
+        @stat("ief", MVA, MMA) <| inf.virus.ief
     end
 end

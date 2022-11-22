@@ -2,7 +2,11 @@ function step!(model, pars)
     model.time += pars.timestep
 
     if model.time / 60 >= 24
-        model.day = (model.day) % 7 + 1
+        model.day += 1
+        if model.day == 8
+            model.day = + 1
+            model.week += 1
+        end
         model.time = 0
     end
 
@@ -13,15 +17,15 @@ function step!(model, pars)
     end
 
     for agent in world.pop
-        disease!(agent, pars)
+        disease!(agent, world, pars)
     end
 
     for house in world.map
-        infection!(house, pars)
+        infection!(house, world, pars)
     end
 
     for transp in world.transports, car in transp.cars
-        infection!(car, pars)
+        infection!(car, world, pars)
     end
 end
         

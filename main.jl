@@ -9,10 +9,14 @@ Random.seed!(pars.seed)
 
 const model = setup_model(pars)
 
-for i in 1:pars.n_steps
-    step!(model, pars)
-    data = observe(Data, model.world)
-    if model.day == 1 && model.time == 0
-        println(data.n_inf.n)
+function run(model, pars)
+    for i in 1:pars.n_steps
+        step!(model, pars)
+        data = observe(Data, model.world)
+        println("day: ", model.day, "\ttime: ", model.time/60, "\t", data.n_commute.n)
     end
+end
+
+if !isinteractive()
+    run(model, pars)
 end

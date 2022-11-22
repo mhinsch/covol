@@ -1,3 +1,4 @@
+using Distributions
 
 function get_rnd_empty_house(houses)
     while true
@@ -58,7 +59,7 @@ function create_world(pars)
 
     t_cache = [ Transport[] for x in 1:pars.x_size, y in 1:pars.y_size ]
 
-    World(map, houses, [], [], t_cache, [])
+    World(map, houses, [], [], t_cache, [], IEF([], []))
 end
 
 
@@ -97,6 +98,26 @@ function setup_transport!(world, pars)
             cache_transport!(t, world.t_cache, x, y,  pars)
         end
     end
+    nothing
+end
+
+
+function setup_ief!(world, pars)
+    pop = zeros(Int, pars.ief_pre_N)
+
+    n_mutation_d = mut_distr(pars.ief_p_mut, pars.n_basepairs)
+    fitness_d = Normal(pars.ief_mut_mu, pars.ief_mut_sigma)
+
+    ief = world.ief
+
+    for i in 1:pars.ief_pre_n_steps
+        step_population!(pop, n_mutation_d)
+        samples, exp_value = ief_instance(pop, pars.ief_pre_n_samples, fitness_d)
+        table = lookup_table(samples, pars.ief_pre_n_bins)
+        push!(ief.fitness, table)
+        push!(ief.mean, exp_value)
+    end
+    nothing
 end
 
 function setup_schedules!(world, pars)
@@ -160,8 +181,11 @@ end
 
 
 function initial_infected!(world, pars)
-    for i in pars.n_infected
-        rand(world.pop).immune.status = IStatus.infected
+    for i in 1:pars.n_infected
+        inf = rand(world.pop)
+        inf.immune.status = IStatus.infected
+        inf.virus.ief = 1.0
+        inf.virus.e_ief = 1.0
     end
 end
 
@@ -170,8 +194,9 @@ function setup_model(pars)
     world = create_world(pars)
     setup_transport!(world, pars)
     setup_schedules!(world, pars)
+    setup_ief!(world, pars)
     create_agents!(world, pars)
     setup_social!(world, pars)
     initial_infected!(world, pars)
-    Model(world, 1, 0)
+    Model(world, 0, 1, 0)
 end

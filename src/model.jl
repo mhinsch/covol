@@ -59,43 +59,76 @@ function arrive!(agent, world, pars)
 end
 
 
-function calc_inf_rate(place, pars)
-    n_inf = count(place.present) do a
-        a.immune.status == IStatus.infected
-    end
-
-    # probability to encounter at least one infected individual and
-    # be exposed to the virus
-    # TODO account for multiple encounters?
-    1 - (1 - pars.p_encounter * pars.p_expose)^n_inf
+function inf_rate(infectee, virus, pars)
+    # tentative
+    # TODO think about whether this makes sense
+    pars.p_inf[Int(infectee.immune.status)] ^ (1/(infectee.risk*virus.e_ief))
 end
 
 # very simplistic model for now
-function expose!(agent, pars)
-    p_inf = pars.p_inf[Int(agent.immune.status)] ^ agent.risk
+function encounter!(inf, susc, place, world, pars)
+    p_inf = inf_rate(susc, inf.virus, pars)
 
     if rand() < p_inf
-        agent.immune.status = IStatus.infected
+        infect!(susc, inf.virus, world, pars)
     end
 end
 
+function infect!(agent, virus, world, pars)
+    agent.immune.status = IStatus.infected
+    agent.virus.age = 0
+    agent.virus.ief = transmitted_ief(virus, world.ief, pars)
+    agent.virus.e_ief = 1.0
+end
 
 # done globally for now
 # TODO take into account viral load
-# TODO [strains] pairwise when strains are implemented
-function infection!(place, pars)
-    # currently step-wise
-    prob = calc_inf_rate(place, pars)
-    
-    for agent in place.present
-        if agent.immune.status != IStatus.infected && rand() < prob
-            expose!(agent, pars)
+function infection!(place, world, pars)
+    inf = Agent[]; susc = Agent[]
+    for a in place.present
+        if infectious(a)
+            push!(inf, a)
+        elseif susceptible(a)
+            push!(susc, a)
         end
+    end
+
+    if isempty(inf) || isempty(susc)
+        return
+    end
+
+    n_pairs = length(inf) * length(susc)
+
+    # determine number of encounters
+    if n_pairs > 15 && pars.p_encounter < 0.1
+        n_enc = rand(Poisson(n_pairs * pars.p_encounter))
+    else
+        n_enc = 0
+        for i in 1:n_pairs
+            if rand() < pars.p_encounter
+                n_enc += 1
+            end
+        end
+    end
+
+    for e in n_enc
+        encounter!(rand(inf), rand(susc), place, world, pars)
     end
 end
 
-function disease!(agent, pars)
+# only evolution if IEF for now
+function virus!(virus, ief, pars)
+    virus.age += 1
+
+    if virus.age % pars.t_repr_cycle == 0
+        virus.e_ief = expected_ief(virus, ief, pars)
+    end
+end
+
+
+function disease!(agent, world, pars)
     if agent.immune.status == IStatus.infected
+        virus!(agent.virus, world.ief, pars)
         if rand() < pars.p_rec
             agent.immune.status = IStatus.recovered
         end

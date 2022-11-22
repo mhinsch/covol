@@ -1,5 +1,6 @@
 include("src/util.jl")
 include("src/schedule.jl")
+include("src/ief.jl")
 include("src/agents.jl")
 include("src/model.jl")
 include("src/setup.jl")
@@ -83,6 +84,5 @@ function load_parameters_from_file(fname)
     par_from_yaml(yaml, Params, "Params") 
 end
 
-n_instances(T) = length(instances(T))
 
 

@@ -14,6 +14,7 @@ end
 sq_dist(x1, y1, x2, y2) = (x2-x1)^2 + (y2-y1)^2
 distance(x1, y1, x2, y2) = sqrt(sq_dist(x1, y1, x2, y2))
 
+n_instances(T) = length(instances(T))
 
 # based on this code:
 # https://stackoverflow.com/questions/40273880/draw-a-line-between-two-pixels-on-a-grayscale-image-in-julia

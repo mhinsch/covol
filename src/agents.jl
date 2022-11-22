@@ -1,5 +1,6 @@
 using EnumX
 using Parameters
+using Distributions
 
 @enumx PlaceT residential=1 school hospital supermarket work leisure transport nowhere
 
@@ -30,7 +31,29 @@ end
 
 # TODO replace with proper model
 mutable struct Virus
-    N :: Float64
+    # time since infection
+    age :: Int
+    # inter host fitness of infecting strain
+    ief :: Float64
+    # expected IEF (needed for inf prob)
+    e_ief :: Float64
+end
+
+Virus() = Virus(0, 0.0, 0.0)
+
+function expected_ief(virus, ief, pars)
+    t = min(pars.ief_pre_n_steps, floor(Int, virus.age / pars.t_repr_cycle))
+    
+    virus.ief * (t == 0 ? 1.0 : ief.mean[t])
+end
+
+# sample an ief value *after* transmission
+function transmitted_ief(virus, ief, pars)
+    t = min(pars.ief_pre_n_steps, floor(Int, virus.age / pars.t_repr_cycle))
+
+    t_ief = t == 0 ? 1.0 : draw(ief.fitness[t])
+
+    virus.ief * t_ief
 end
 
 
@@ -77,10 +100,14 @@ end
 
 
 Agent(h, w, schedule) = Agent(Activity.home, h, h, Activity.home, 0, 30, 
-    1.0, Immune(IStatus.naive), Virus(0.0), rand(), 
+    1.0, Immune(IStatus.naive), Virus(), rand(), 
     rand(), 0.0, 0.0, 0.5, 
     [], [], h, w, [], [], 
     schedule)
+
+infectivity(agent) = agent.virus.e_ief
+infectious(agent) = agent.immune.status == IStatus.infected
+susceptible(agent) = !infectious(agent)
 
 const Place = PlaceG{Agent}
 
@@ -109,6 +136,12 @@ mutable struct Transport
 end
 
 
+struct IEF
+    fitness :: Vector{Lookup{Float64, Int}}
+    mean :: Vector{Float64}
+end
+
+
 mutable struct World
     # houses arranged spatially
     map :: Matrix{Place}
@@ -118,11 +151,14 @@ mutable struct World
     transports :: Vector{Transport}
     t_cache :: Matrix{Vector{Transport}}
     schedules :: Vector{Schedule}
+    ief :: IEF
 end
 
 
 mutable struct Model
     world :: World
+    # overall week
+    week :: Int
     # day of the week
     day :: Int
     # time of day in minutes
