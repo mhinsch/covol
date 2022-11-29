@@ -102,24 +102,6 @@ function setup_transport!(world, pars)
 end
 
 
-function setup_ief!(world, pars)
-    pop = zeros(Int, pars.ief_pre_N)
-
-    n_mutation_d = mut_distr(pars.ief_p_mut, pars.n_basepairs)
-    fitness_d = Normal(pars.ief_mut_mu, pars.ief_mut_sigma)
-
-    ief = world.ief
-
-    for i in 1:pars.ief_pre_n_steps
-        step_population!(pop, n_mutation_d)
-        samples, exp_value = ief_instance(pop, pars.ief_pre_n_samples, fitness_d)
-        table = lookup_table(samples, pars.ief_pre_n_bins)
-        push!(ief.fitness, table)
-        push!(ief.mean, exp_value)
-    end
-    nothing
-end
-
 function setup_schedules!(world, pars)
     SI = SchedItem
     workday_home = [

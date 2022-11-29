@@ -34,27 +34,12 @@ mutable struct Virus
     # time since infection
     age :: Int
     # inter host fitness of infecting strain
-    ief :: Float64
+    ief_0 :: Float64
     # expected IEF (needed for inf prob)
     e_ief :: Float64
 end
 
 Virus() = Virus(0, 0.0, 0.0)
-
-function expected_ief(virus, ief, pars)
-    t = min(pars.ief_pre_n_steps, floor(Int, virus.age / pars.t_repr_cycle))
-    
-    virus.ief * (t == 0 ? 1.0 : ief.mean[t])
-end
-
-# sample an ief value *after* transmission
-function transmitted_ief(virus, ief, pars)
-    t = min(pars.ief_pre_n_steps, floor(Int, virus.age / pars.t_repr_cycle))
-
-    t_ief = t == 0 ? 1.0 : draw(ief.fitness[t])
-
-    virus.ief * t_ief
-end
 
 
 @enumx Activity home=1 working leisure shopping hospital travel none
@@ -133,12 +118,6 @@ mutable struct Transport
 
     cars :: Vector{Place}
     car_cap :: Int
-end
-
-
-struct IEF
-    fitness :: Vector{Lookup{Float64, Int}}
-    mean :: Vector{Float64}
 end
 
 
