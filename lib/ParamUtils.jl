@@ -17,7 +17,8 @@
 
 module ParamUtils
 
-export fields_as_args!, fields_as_cmdl,  override_pars_cmdl!, par_from_yaml, par_to_yaml
+export fields_as_args!, fields_as_cmdl,  override_pars_cmdl!, 
+    pars_from_dict, par_from_dict, pars_to_dict 
 
 using ArgParse
 using REPL
@@ -50,15 +51,18 @@ function fields_as_cmdl(o, ignore = [])
 	res
 end
 
-"set fields in pars to values in args, if provided"
-function override_pars_cmdl!(pars, args)
-    fields = fieldnames(typeof(pars))
+"set fields in `par_objects` to values in `args`, if provided"
+function override_pars_cmdl!(args, par_objects...)
+    for pars in par_objects
+        fields = fieldnames(typeof(pars))
 
-    for f in fields
-        if args[f] != nothing
-            setfield!(pars, f, args[f])
+        for f in fields
+            if args[f] != nothing
+                setfield!(pars, f, args[f])
+            end
         end
     end
+    nothing
 end
 
 
@@ -104,45 +108,59 @@ end
 # We simply overload asValue for A==AbstractString and any B that is not recognised
 # by YAML.
 "set value of a struct's field while allowing for type coercion overloads"
-setValue!(str, fname, value) = setfield!(str, fname, 
-                                         asType(fieldtype(typeof(str), fname), value))
+set_value!(str, fname, value) = setfield!(str, fname, 
+                                         as_type(fieldtype(typeof(str), fname), value))
 
 
-"Read a parameter object `par` stored as `name` in dict `yaml`."
-function par_from_yaml(yaml, par, name; require_all_fields = true)
+"Read a parameter object `par` stored as `name` in dict `dict`."
+function par_from_dict(dict, par, name; require_all_fields = true)
     # type not in file, so don't do anything
-    if !haskey(yaml, name)
+    if !haskey(dict, name)
         return par
     end
 
-    pyaml = yaml[name]
+    pdict = dict[name]
 
     ptype = typeof(par)
     for f in fieldnames(ptype)
-        if require_all_fields && !haskey(pyaml, f)
+        if require_all_fields && !haskey(pdict, f)
             # all fields have to be set (or none)
             error("Field $f required in parameter $(name)!")
         end
 
         # use setValue, so that e.g. Rational can be converted from String
-        set_value!(par, f, pyaml[f])
+        set_value!(par, f, pdict[f])
     end
 
     par
 end
 
-# specialised version that takes the type instead of a par object
-"Create an object of type `ptype` and read its values stored as `name` in dict `yaml`."
-function par_from_yaml(yaml, ptype::DataType, name; require_all_fields = true)
-    par_from_yaml(yaml, ptype(), name; require_all_fields)
+#"Create objects from dict `dict`. Expects pairs of `type => name` in `partypes`. "
+#function pars_from_dict(dict, partypes; require_all_fields = true)
+#    [ par_from_dict(dict, typ(), name; require_all_fields) for (typ, name) in partypes ]
+#end
+
+
+"Create objects from dict `dict`. Returns a tuple of objects of the types given by `partypes`. "
+function pars_from_dict(dict, partypes...; require_all_fields = true)
+    ret_type = Tuple{partypes...}
+    ret_type([ par_from_dict(dict, typ(), nameof(typ); require_all_fields) 
+              for typ in partypes ])
 end
 
 
-"generate dict from dict from `par`"
-function par_to_yaml(par)
+"generate dict from `parameters`"
+function pars_to_dict(parameters...)
     dict = Dict{Symbol, Any}()
-    for n in fieldnames(typeof(par))
-        dict[n] = getfield(par, n)
+
+    for par in parameters
+        ptype = typeof(par)
+        pdict = Dict{Symbol, Any}()
+        for n in fieldnames(ptype)
+            pdict[n] = getfield(par, n)
+        end
+
+        dict[nameof(ptype)] = pdict
     end
 
     dict

@@ -1,6 +1,6 @@
 module IEFModel
 
-export IEF, setup_ief!, expected_ief_factor, transmitted_ief_factor, IEFParams
+export IEF, setup_ief, expected_ief_factor, transmitted_ief_factor, IEFParams
 
 include("ief.jl")
 include("ief_pars.jl")
@@ -13,7 +13,7 @@ struct IEF
 end
 
 
-function setup_ief!(pars)
+function setup_ief(pars)
     pop = zeros(Int, pars.ief_pre_N)
 
     n_mutation_d = mut_distr(pars.ief_p_mut, pars.n_basepairs)

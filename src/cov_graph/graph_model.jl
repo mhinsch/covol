@@ -6,12 +6,16 @@ using Erdos
 
 mutable struct Agent
     virus :: Virus
-    status :: Immune
+    immune :: Immune
+    risk :: Float64
     contacts :: Vector{Agent}
 end
 
-Agent() = Agent(Virus(), Immune(), [])
+Agent() = Agent(Virus(), Immune(), 1.0, [])
 
+infectivity(agent) = agent.virus.e_ief
+infectious(agent) = agent.immune.status == IStatus.infected
+susceptible(agent) = !infectious(agent)
 
 function connect!(ag1, ag2)
     push!(ag1.contacts, ag2)
@@ -24,8 +28,21 @@ mutable struct World
     ief :: IEF
 end
 
+mutable struct Model
+    world :: World
+end
 
-function setup(pars)
+function initial_infected!(world, pars)
+    for i in 1:pars.n_infected
+        inf = rand(world.pop)
+        inf.immune.status = IStatus.infected
+        inf.virus.ief_0 = 1.0
+        inf.virus.e_ief = 1.0
+    end
+end
+
+
+function setup_model(pars, iefpars)
     graph = erdos_renyi(pars.n_nodes, pars.mean_k/pars.n_nodes)
 
     agents = [Agent() for i in 1:pars.n_nodes]
@@ -34,22 +51,28 @@ function setup(pars)
         connect!(agents[src(e)], agents[dst(e)])
     end
 
-    World(agents, setup_ief(pars))
+    model = Model(World(agents, IEFModel.setup_ief(iefpars)))
+
+    initial_infected!(model.world, pars)
+
+    model
 end
 
 
-function update!(model, pars)
-    for a in model.pop
-        disease!(a, model, pars)
+function step!(model, pars, iefpars)
+    for a in model.world.pop
+        disease!(a, model.world, pars, iefpars)
     end
 
     # avoid order effects on interaction
-    shuffle!(model.pop)
+    shuffle!(model.world.pop)
 
-    for a in model.pop
+    for a in model.world.pop
         if a.immune.status == IStatus.infected
             for c in a.contacts
-                encounter!(a, c, model.ief, pars)
+                if c.immune.status != IStatus.infected
+                    encounter!(a, c, model.world.ief, pars, iefpars)
+                end
             end
         end
     end

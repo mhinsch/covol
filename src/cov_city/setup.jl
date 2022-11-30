@@ -129,7 +129,7 @@ function setup_schedules!(world, pars)
 end
 
 function setup_ief!(world, iefpars)
-    world.ief = IEFModel.setup_ief!(iefpars)
+    world.ief = IEFModel.setup_ief(iefpars)
 end
 
 function create_agents!(world, pars)

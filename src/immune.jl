@@ -7,4 +7,6 @@ mutable struct Immune
     status :: IStatus.T
 end
 
+Immune() = Immune(IStatus.naive)
+
 
