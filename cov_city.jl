@@ -1,0 +1,13 @@
+add_to_load_path!("src/simple_ief")
+
+include("src/util.jl")
+include("src/immune.jl")
+include("src/disease.jl")
+include("src/infection.jl")
+include("src/virus.jl")
+include("src/cov_city/agents.jl")
+include("src/cov_city/model.jl")
+include("src/cov_city/setup.jl")
+include("src/cov_city/params.jl")
+include("src/cov_city/update.jl")
+include("src/cov_city/activity.jl")
