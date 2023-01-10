@@ -28,7 +28,7 @@ using Parameters
     n_cars          :: Int              = 5
 
     "number of agents"
-    n_agents        :: Int              = 10000
+    n_agents        :: Int              = 20000
     "initial number of infected agents"
     n_infected      :: Int              = 10
 
@@ -39,8 +39,9 @@ using Parameters
 
     "probability (per time step) for two given agents to encounter each other at a shared location"
     p_encounter     :: Float64          = 0.01
+    p_inf_base      :: Float64          = 0.05
     "probability to become infected after exposure"
-    p_inf           :: Vector{Float64}  = [0.05, 0.05, 0.05, 0.05]
+    p_inf           :: Vector{Float64}  = [1.0, 1.0, 1.0, 1.0]
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
 

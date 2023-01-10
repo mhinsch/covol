@@ -1,7 +1,7 @@
 using EnumX
 using Parameters
 using Distributions
-using Erdos
+using Erdos: erdos_renyi, edges, src, dst
 
 
 mutable struct Agent
@@ -65,9 +65,9 @@ function step!(model, pars, iefpars)
     end
 
     # avoid order effects on interaction
-    shuffle!(model.world.pop)
+    spop = shuffle(model.world.pop)
 
-    for a in model.world.pop
+    for a in spop
         if a.immune.status == IStatus.infected
             for c in a.contacts
                 if c.immune.status != IStatus.infected

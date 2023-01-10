@@ -10,7 +10,7 @@ end
 using ArgParse
 using YAML
 
-add_to_load_path!("lib")
+add_to_load_path!(joinpath(@__DIR__, "lib"))
 
 using ParamUtils
 

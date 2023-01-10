@@ -3,7 +3,7 @@ using IEFModel
 function inf_rate(infectee, virus, pars)
     # tentative
     # TODO think about whether this makes sense
-    pars.p_inf[Int(infectee.immune.status)] ^ (1/(infectee.risk*virus.e_ief))
+    (pars.p_inf_base * pars.p_inf[Int(infectee.immune.status)]) ^ (1/(infectee.risk*virus.e_ief))
 end
 
 

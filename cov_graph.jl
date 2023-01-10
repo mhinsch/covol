@@ -1,4 +1,4 @@
-add_to_load_path!("src/simple_ief")
+add_to_load_path!(joinpath(@__DIR__, "src/simple_ief"))
 
 include("src/util.jl")
 include("src/immune.jl")

@@ -36,7 +36,7 @@ function main(par_overrides...)
     screenWidth = floor(Int, 1600 * scale)
     screenHeight = floor(Int, 900 * scale)
 
-    RL.InitWindow(screenWidth, screenHeight, "this is a test")
+    RL.InitWindow(screenWidth, screenHeight, "Covol 0.1 [city]")
     RL.SetTargetFPS(30)
     camera = RL.RayCamera2D(
         rayvector(10, 10),
