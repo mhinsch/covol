@@ -71,7 +71,10 @@ function draw_graph(x_0, y_0, width, height, graphs;
 		g_min = single_scale ? min_all : g.min
 
 		# no x or y range, can't draw
-		if g_max <= g_min || length(g.data) <= 1
+		if g_max <= g_min || 
+    		isnan(g_max) || isnan(g_min) || 
+    		isinf(g_max) || isinf(g_min) || 
+    		length(g.data) <= 1
 			continue
 		end
 
@@ -82,6 +85,8 @@ function draw_graph(x_0, y_0, width, height, graphs;
 		dyold = height_g - trunc(Int, (g.data[1]-g_min) * y_scale ) 
 
         for (i,dat) in enumerate(g.data)
+			if  isnan(dat) continue end
+			
 			dx = trunc(Int, (i-1) * x_scale) + 1
 			dy = height_g - trunc(Int, (dat-g_min) * y_scale) 
 			RL.DrawLine(x_0_g+dxold, y_0+dyold, x_0_g+dx, y_0+dy, g.colour)
