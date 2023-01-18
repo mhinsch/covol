@@ -112,7 +112,7 @@ function main(par_overrides...)
             fontsize = floor(Int, 15 * scale))
 
         #date = Date(2020) + Week(model.week) + Day(model.day)
-        RL.DrawText("$(trunc(Int, t/(24*4)))", 0, 
+        RL.DrawText("$(trunc(Int, t/iefpars.t_repr_cycle))", 0, 
                     screenHeight - floor(Int, 20 * scale), 
                     floor(Int, 20 * scale), RL.BLACK)
 

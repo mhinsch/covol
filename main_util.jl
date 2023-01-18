@@ -15,7 +15,7 @@ add_to_load_path!(joinpath(@__DIR__, "lib"))
 using ParamUtils
 
 
-function load_parameters(argv, partypes, cmdl...)
+function load_parameters(argv, partypes, cmdl...; override = nothing)
 	arg_settings = ArgParseSettings("run simulation", autofix_names=true)
 
 	@add_arg_table! arg_settings begin
@@ -45,8 +45,11 @@ function load_parameters(argv, partypes, cmdl...)
     # returns a tuple!
     par_objects = load_parameters_from_file(args[:par_file], partypes...)
 
+    # override values that were provided as arguments
+    if override != nothing
+        override_pars_cmdl!(override, par_objects...)
+    end
     # override values that were provided on command line
-
     override_pars_cmdl!(args, par_objects...)
 
     # keep a record of parameters used 
