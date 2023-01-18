@@ -57,7 +57,7 @@ function override_pars_cmdl!(args, par_objects...)
         fields = fieldnames(typeof(pars))
 
         for f in fields
-            if args[f] != nothing
+            if haskey(args, f) && args[f] != nothing
                 setfield!(pars, f, args[f])
             end
         end
