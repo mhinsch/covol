@@ -12,8 +12,8 @@ using Parameters
     ief_mut_mu      :: Float64          = 0.9
     "sigma of normal dist describing fitness effect of ief mutation"
     ief_mut_sigma   :: Float64          = 0.1
-    "number of time steps to pre-compute ief fitness for"
-    ief_pre_n_steps :: Int              = floor(Int, 14 * 24 * 4 / 10)
+    "number of reproduction cycles to pre-compute ief for"
+    ief_pre_n_steps :: Int              = floor(Int, 14 * 24 * 4 / 40)
     "number of samples to base fitness calculation on"
     ief_pre_n_samples :: Int            = 10000
     "number of bins in fitness lookup table"
