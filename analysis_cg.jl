@@ -13,7 +13,9 @@ const MMA = MaxMinAcc{Float64}
 
     @for inf in Iterators.filter(p->infectious(p), world.pop) begin
         @stat("ief", MVA, MMA) <| inf.virus.ief_0
-        @stat("r0", MVA, HistAcc(0.0, 1.0)) <| (pars.mean_k * pars.p_inf_base^(1/inf.virus.e_ief) / 
+        #@stat("r0", MVA, HistAcc(0.0, 1.0)) <| (pars.mean_k * pars.p_inf_base^(1/inf.virus.e_ief) / 
+        #                         pars.p_rec)
+        @stat("r0", MVA, HistAcc(0.0, 1.0)) <| (pars.mean_k * (1-(1-pars.p_inf_base)^inf.virus.e_ief) / 
                                  pars.p_rec)
     end
 
