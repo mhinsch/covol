@@ -27,7 +27,7 @@ mut_distr(p_mutation, n_basepairs) = Poisson(p_mutation * n_basepairs)
 function ief_instance(pop, n_samples, fit_distr)
     fitnesses = [fitness(n, fit_distr) for n in pop]
     w_fitnesses = cumsum(fitnesses)
-
+    
     [ weighted_choice(fitnesses, w_fitnesses) for i in 1:n_samples ], 
         w_fitnesses[end]/length(w_fitnesses)
 end
@@ -41,10 +41,13 @@ end
 "Compress a sample of fitness values into a lookup table with `n_bins` bins."
 function lookup_table(samples, n_bins)
     mi, ma = extrema(samples)
-
+    
     bw = (ma-mi)/n_bins
+            
     values = [ mi + i*bw - bw/2 for i in 1:n_bins ]
-
+    
+    # set bin width to infinite if data has no range
+    if bw == 0.0 bw=Inf end
     bins = zeros(Int, n_bins)
     for s in samples
         # max value goes into last bin as well
