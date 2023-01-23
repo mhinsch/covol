@@ -14,7 +14,7 @@ end
 
 function run(model, pars, iefpars, log_file = nothing)
     for i in 1:pars.n_steps
-        step!(model, pars, iefpars)
+        step_time!(model, 1.0)
         data = observe(Data, model.world, pars, iefpars)
         #ticker(model, i, data)
         if log_file != nothing
@@ -33,6 +33,7 @@ const model = setup_model(pars, iefpars)
 
 if !isinteractive()
     const f = setup_logs()
+    spawn!(model)
     @time run(model, pars, iefpars, f)
     close(f)
 end

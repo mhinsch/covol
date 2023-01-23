@@ -1,12 +1,17 @@
 using IEFModel
 
 
-function inf_rate(infectee, virus, pars)
+function inf_prob(infectee, virus, pars)
     # tentative
     # TODO think about whether this makes sense
     # (pars.p_inf_base * pars.p_inf[Int(infectee.immune.status)]) ^ (1/(infectee.risk*virus.e_ief))
     # this should be more in line with a rate-based model 
     1 - (1 - pars.p_inf_base * pars.p_inf[Int(infectee.immune.status)]) ^ (infectee.risk*virus.e_ief)
+end
+
+
+function inf_rate(infectee, virus, pars)
+    pars.r_inf_base * pars.r_inf[Int(infectee.immune.status)] * infectee.risk * virus.e_ief
 end
 
 
@@ -20,7 +25,7 @@ end
 
 # very simplistic model for now
 function encounter!(inf, susc, ief, pars, iefpars)
-    p_inf = inf_rate(susc, inf.virus, pars)
+    p_inf = inf_prob(susc, inf.virus, pars)
 
     if rand() < p_inf
         infect!(susc, inf.virus, ief, pars, iefpars)
