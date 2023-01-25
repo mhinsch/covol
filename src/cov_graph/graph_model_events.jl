@@ -19,7 +19,11 @@ infectivity(agent) = agent.virus.e_ief
 infected(agent) = agent.immune.status == IStatus.infected
 infectious(agent) = infected(agent)
 susceptible(agent) = !infected(agent)
-recover!(agent) = agent.immune.status = IStatus.recovered
+
+function recover!(agent)
+    agent.immune.status = IStatus.recovered
+    agent.virus.e_ief = 0.0
+end
 
 function connect!(ag1, ag2)
     push!(ag1.contacts, ag2)
@@ -60,20 +64,12 @@ function setup_model(pars, iefpars)
 end
 
 
-function select_weighted(weight_fn, elems)
-    weights = [ weight_fn(e) for e in elems ] |> cumsum
-    i = searchsortedfirst(weights, rand() * weights[end])
-    elems[i]
-end
-
-
 @events agent::Agent begin
     @debug
-    @rate(sum(c -> inf_rate(agent, c.virus, @sim().pars), agent.contacts)) ~
+    # CAUTION: includes non-infected agents (with e_ief == 0)
+    @ratesfor(c -> inf_rate(agent, c.virus, @sim().pars), agent.contacts) ~
         susceptible(agent) => begin
-            infect!(agent, 
-                select_weighted(c -> inf_rate(agent, c.virus, @sim().pars), agent.contacts).virus,
-                @sim().world.ief, @sim().pars, @sim().iefpars)
+            infect!(agent,  @selected().virus, @sim().world.ief, @sim().pars, @sim().iefpars)
                 
             MiniEvents.scheduled_action!(agent, @sim())
             @r agent agent.contacts
@@ -84,9 +80,8 @@ end
             recover!(agent)
             @r agent agent.contacts
         end
-        
       
-    @repeat(@sim().iefpars.t_repr_cycle, @sim().iefpars.t_repr_cycle) => begin
+    @repeat(@sim().iefpars.t_repr_cycle) => begin
             if !infected(agent)
                 return
             end
