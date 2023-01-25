@@ -52,15 +52,18 @@ function main(par_overrides...)
     graph_ief_mn = Graph{Float64}(RL.BLACK)
     graph_ief_mx = Graph{Float64}(RL.WHITE)
     graph_R0 = Graph{Float64}(RL.PURPLE)
+    graph_R0m = Graph{Float64}(RL.RED)
     
-    t = 0
+    spawn!(model)
+    t = 0.0
+    dt = 1.0
     pause = false
 #    time = Rational(simPars.startTime)
     while !RL.WindowShouldClose()
 
         if !pause #&& time <= simPars.finishTime
-            t += 1 
-            step!(model, pars, iefpars)
+            t += dt 
+            step_time!(model, dt)
             data = observe(Data, model.world, pars, iefpars)
             #log_results(logfile, data)
             # add values to graph objects
@@ -69,12 +72,19 @@ function main(par_overrides...)
             add_value!(graph_ief_mn, data.ief.mean)
             add_value!(graph_ief_mx, data.ief.max)
             add_value!(graph_R0, data.r0.mean)
+            add_value!(graph_R0m, data.r0.max)
             println(data.n_inf.n, " ", data.n_rec.n)
         end
 
         if RL.IsKeyPressed(Raylib.KEY_SPACE)
             pause = !pause
             sleep(0.2)
+        elseif RL.IsKeyPressed(Raylib.KEY_COMMA)
+            dt /= 1.1
+            println("dt: ", dt)
+        elseif RL.IsKeyPressed(Raylib.KEY_PERIOD)
+            dt *= 1.1
+            println("dt: ", dt)
         end
 
         RL.BeginDrawing()
@@ -89,9 +99,9 @@ function main(par_overrides...)
 
         draw_graph(floor(Int, screenWidth*1/3), 0, 
                    floor(Int, screenWidth/3), floor(Int, screenHeight/2) - 30, 
-            [graph_R0],
+            [graph_R0, graph_R0m],
             single_scale = true, 
-            labels = ["R0"],
+            labels = ["R0", "max R0"],
             fontsize = floor(Int, 15 * scale))
 
         # draw graphs
