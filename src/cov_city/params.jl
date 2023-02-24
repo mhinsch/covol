@@ -44,6 +44,21 @@ using Parameters
     p_inf           :: Vector{Float64}  = [1.0, 1.0, 1.0, 1.0]
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
+  
+    "time steps between experience updates"
+    dt_exp			:: Int				= 60 * 24 - 1 # once per day
+    "decay in covid experience if noone is sick"
+    exp_decay		:: Float64			= 0.1
+    "weight of own covid experience"
+    exp_self_weight	:: Float64			= 0.2
+    "weight of family covid experience"
+    exp_family_weight :: Float64		= 0.1
+    "weight of friends' covid experience"
+    exp_friends_weight :: Float64		= 0.05
+    "how cautious to be about going to work"
+    caution_work 	:: Float64			= 1.0
+    "how cautious to be about taking public transport"
+    caution_pub_transp :: Float64		= 2.0
 
     "length of a time step in minutes"
     timestep        :: Int              = 15

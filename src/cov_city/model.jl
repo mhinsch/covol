@@ -5,6 +5,29 @@ function get_transports(world, p1, p2, act, pars)
     intersect(t1, t2)
 end
 
+function decide_home2work(agent, world, pars, t)
+    if rand() < agent.cov_experience ^ (1/pars.caution_work)
+        return
+    end
+    if t < 11*60 && rand() < (t - 7*60) / 150
+        go_to_work!(agent, world, pars)
+    end
+    nothing
+end
+
+function decide_work2home(agent, world, pars, t)
+    if rand() < agent.cov_experience ^ (1/pars.caution_work) ||
+            rand() < (t - 16.5*60) / 90
+        go_home!(agent, world, pars)
+    end
+    nothing
+end
+
+
+function decide_public_transport(agent, pars)
+    ! (rand() < agent.cov_experience ^ (1/pars.caution_pub_transp))
+end
+
 
 function go_to_work!(agent, world, pars)
     @assert agent.activity == Activity.home
@@ -18,19 +41,22 @@ function go_home!(agent, world, pars)
     travel!(agent, agent.home, Activity.home, world, pars)
 end
 
+"start agent travel"
 function travel!(agent, dest, activity, world, pars)
     agent.activity = Activity.travel
     agent.plan = activity
     agent.dest = dest
-
-    tps = get_transports(world, agent.loc, dest, activity, pars)
-
+    
     tp = Nowhere
+    
+    if decide_public_transport(agent, pars)
+        tps = get_transports(world, agent.loc, dest, activity, pars)
 
-    for t in tps, car in t.cars
-        if length(car.present) < pars.car_cap
-            tp = car
-            break
+        for t in tps, car in t.cars
+            if length(car.present) < pars.car_cap
+                tp = car
+                break
+            end
         end
     end
 
@@ -48,6 +74,27 @@ function arrive!(agent, world, pars)
     agent.plan = Activity.none
 end
 
+# TODO diminishing returns for higher numbers friends/family
+function covid_experience!(agent, world, pars)
+    delta = - agent.cov_experience * pars.exp_decay 
+    if sick(agent)
+        delta += (1.0 - agent.cov_experience) * pars.exp_self_weight
+    end
+    
+    for a in agent.family 
+        if sick(a)
+            delta += (1.0 - agent.cov_experience) * pars.exp_family_weight
+        end
+    end
+
+    for a in agent.friends
+        if sick(a)
+            delta += (1.0 - agent.cov_experience) * pars.exp_friends_weight
+        end
+    end
+    
+    agent.cov_experience = max(min(agent.cov_experience + delta, 1.0), 0.0)
+end
 
 # done globally for now
 # TODO take into account viral load

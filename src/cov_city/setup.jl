@@ -128,6 +128,26 @@ function setup_schedules!(world, pars)
     push!(world.schedules, sched)
 end
 
+
+function setup_flexible_schedules!(world, pars)
+    workday_home = [
+        6*60 => decide_home2work 
+       ]
+    workday_working = [
+        10*60 => decide_work2home
+       ]
+
+    sched = Schedule(FlexibleDaySched, 6)
+
+    for day in 1:5
+        sched.at[day, Int(Activity.home)] = workday_home
+        sched.at[day, Int(Activity.working)] = workday_working
+    end
+
+    push!(world.schedules, sched)
+end
+
+
 function setup_ief!(world, iefpars)
     world.ief = IEFModel.setup_ief(iefpars)
 end

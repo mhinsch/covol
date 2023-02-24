@@ -73,6 +73,7 @@ Agent(h, w, schedule) = Agent(Activity.home, h, h, Activity.home, 0, 30,
     schedule)
 
 infectivity(agent) = agent.virus.e_ief
+sick(agent) = agent.immune.status == IStatus.infected
 infectious(agent) = agent.immune.status == IStatus.infected
 susceptible(agent) = !infectious(agent)
 

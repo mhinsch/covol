@@ -4,7 +4,7 @@ function step!(model, pars, iefpars)
     if model.time / 60 >= 24
         model.day += 1
         if model.day == 8
-            model.day = + 1
+            model.day = 1
             model.week += 1
         end
         model.time = 0
@@ -26,6 +26,12 @@ function step!(model, pars, iefpars)
 
     for transp in world.transports, car in transp.cars
         infection!(car, world, pars, iefpars)
+    end
+    
+    if model.time % pars.dt_exp == 0
+        for agent in world.pop
+            covid_experience!(agent, world, pars)
+        end
     end
 end
         
