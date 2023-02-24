@@ -24,7 +24,7 @@ function SchedItem(args...)
 end
 
 "Activate an activity in `item`."
-function trigger!(agent, world, pars, item)
+function trigger!(agent, world, pars, item::SchedItem, time)
     r = rand()
     sel = findfirst(>(r), item.probs)
     if sel == nothing 
@@ -32,20 +32,35 @@ function trigger!(agent, world, pars, item)
     end
 
     item.transs[sel](agent, world, pars)
+    nothing
+end
+
+"Activate an activity in `item`."
+function trigger!(agent, world, pars, decision, t)
+    decision(agent, world, pars, t)
+    nothing
 end
 
 "A daily schedule, consisting of a list of time points and associated schedule items."
 const DaySched = Vector{Pair{Int, SchedItem}}
 
+const FlexibleDaySched = Vector{Pair{Int, Function}}
+
 "A full weekly schedule indexed by day and agent state."
-mutable struct Schedule
+mutable struct Schedule{DSCHED}
     # day x state
-    at :: Matrix{DaySched}
+    at :: Matrix{DSCHED}
 end
 
 "Allocate a schedule for 7 days and a given number of potential states."
 function Schedule(n_activities::Int)
     sched = [ DaySched() for day in 1:7, activ in 1:n_activities ]
+    Schedule(sched)
+end 
+
+"Allocate a schedule for 7 days and a given number of potential states."
+function Schedule(factory, n_activities::Int)
+    sched = [ factory() for day in 1:7, activ in 1:n_activities ]
     Schedule(sched)
 end 
 
@@ -66,7 +81,7 @@ function apply_day_schedule!(agent, world, pars, sched, time)
         return
     end
 
-    trigger!(agent, world, pars, item)
+    trigger!(agent, world, pars, item, time)
 end
 
 "Apply a week schedule at a given day and time."
