@@ -11,14 +11,18 @@ using Parameters
     x_size          :: Int              = 100
     "number of houses in y direction"
     y_size          :: Int              = 100
-    "number of schools and nurseries"
-    n_schools       :: Int              = 50
+    "ratio of number of inhabitants to number of dwellings"
+    ratio_pop_dwellings :: Float64		= 2.5
+    "proportion of children that go to school/nursery in population"
+    prop_children	:: Float64			= 0.17
+    "school/nursery class sizes"
+    class_size		:: Int              = 30
+    "people per workplace"
+    workplace_size	:: Int				= 10
     "number of hospitals"
     n_hospitals     :: Int              = 50
     "number of supermarkets"
     n_smarkets      :: Int              = 50
-    "number of other commercial buildings (work places)"
-    n_commercial    :: Int              = 50
     "number of leisure buildings"
     n_leisure       :: Int              = 50
 
@@ -27,8 +31,6 @@ using Parameters
     "number of carriages per transport"
     n_cars          :: Int              = 5
 
-    "number of agents"
-    n_agents        :: Int              = 20000
     "initial number of infected agents"
     n_infected      :: Int              = 10
 

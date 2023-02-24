@@ -18,8 +18,20 @@ function create_world(pars)
     for i in 1:n_instances(PlaceT.T)-1
         push!(houses, Vector{Place}())
     end
-
-    for i in 1:pars.n_schools
+    
+    n_houses = pars.x_size * pars.y_size - 
+        pars.n_hospitals - pars.n_smarkets - pars.n_leisure
+    
+    space_per_person = 1/pars.ratio_pop_dwellings + pars.prop_children * 1/pars.class_size +
+        (1-pars.prop_children) * 1/pars.workplace_size
+    
+    pop_size = floor(Int, n_houses/space_per_person * 0.95)
+    
+    n_children = floor(pop_size * pars.prop_children)
+    n_schools = floor(Int, n_children / pars.class_size * 1.05)
+    n_commercial = floor(Int, (pop_size - n_children) / pars.workplace_size)
+    
+    for i in 1:n_schools
         h = get_rnd_empty_house(map)
         h.type = PlaceT.school
         push!(houses[Int(PlaceT.school)], h)
@@ -37,7 +49,7 @@ function create_world(pars)
         push!(houses[Int(PlaceT.supermarket)], h)
     end
 
-    for i in 1:pars.n_commercial
+    for i in 1:n_commercial
         h = get_rnd_empty_house(map)
         h.type = PlaceT.work
         push!(houses[Int(PlaceT.work)], h)
@@ -59,7 +71,7 @@ function create_world(pars)
 
     t_cache = [ Transport[] for x in 1:pars.x_size, y in 1:pars.y_size ]
 
-    World(map, houses, [], [], t_cache, [], IEF([], []))
+    World(map, houses, [], [], t_cache, [], IEF([], [])), pop_size
 end
 
 
@@ -152,7 +164,7 @@ function setup_ief!(world, iefpars)
     world.ief = IEFModel.setup_ief(iefpars)
 end
 
-function create_agents!(world, pars)
+function create_agents!(world, n_agents, pars)
     # simplistic home, work
     # TODO family size distribution
     # TODO non-residential homes (e.g. care homes)
@@ -160,9 +172,12 @@ function create_agents!(world, pars)
     # TODO age structure
     # TODO job type
     # TODO soc status
-    for i in 1:pars.n_agents
+    println("creating $n_agents agents")
+    for i in 1:n_agents
         home = rand(world.houses[Int(PlaceT.residential)])
-        work = rand(world.houses[Int(PlaceT.work)])
+        work = rand() < pars.prop_children ?
+            rand(world.houses[Int(PlaceT.school)]) :
+            rand(world.houses[Int(PlaceT.work)])
         agent = Agent(home, work, rand(world.schedules))
         add_agent!(home, agent)
         
@@ -196,11 +211,11 @@ end
 
 
 function setup_model(pars, iefpars)
-    world = create_world(pars)
+    world, n_agents = create_world(pars)
     setup_transport!(world, pars)
     setup_schedules!(world, pars)
     setup_ief!(world, iefpars)
-    create_agents!(world, pars)
+    create_agents!(world, n_agents, pars)
     setup_social!(world, pars)
     initial_infected!(world, pars)
     Model(world, 0, 1, 0)
