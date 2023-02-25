@@ -213,7 +213,7 @@ end
 function setup_model(pars, iefpars)
     world, n_agents = create_world(pars)
     setup_transport!(world, pars)
-    setup_schedules!(world, pars)
+    setup_flexible_schedules!(world, pars)
     setup_ief!(world, iefpars)
     create_agents!(world, n_agents, pars)
     setup_social!(world, pars)

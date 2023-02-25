@@ -1,6 +1,6 @@
 module DailySchedule
 
-export SchedItem, trigger!, DaySched, Schedule, apply_day_schedule!, apply_schedule!
+export SchedItem, trigger!, DaySched, FlexibleDaySched, Schedule, apply_day_schedule!, apply_schedule!
 
 "One schedule item with a list of activities and weights associated with them."
 struct SchedItem
@@ -25,6 +25,9 @@ end
 
 "Activate an activity in `item`."
 function trigger!(agent, world, pars, item::SchedItem, time)
+    if isempty(item.probs)
+        return
+    end
     r = rand()
     sel = findfirst(>(r), item.probs)
     if sel == nothing 
@@ -66,20 +69,20 @@ end
 
 "Apply the last schedule item in `sched` that has a time point earlier than `time`."
 function apply_day_schedule!(agent, world, pars, sched, time)
-    it_idx = findfirst(sched) do item
-        item[1] > time
+    it_idx = 0
+    for item in sched
+        if item[1] > time
+        	break
+    	end
+    	it_idx += 1
     end
 
-    if it_idx == nothing || it_idx == 1
+    if it_idx == 0
         return
     end
 
     # we want the last one with lower time, so subtract 1
-    t, item = sched[it_idx - 1]
-
-    if isempty(item.probs)
-        return
-    end
+    t, item = sched[it_idx]
 
     trigger!(agent, world, pars, item, time)
 end

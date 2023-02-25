@@ -6,9 +6,9 @@ function get_transports(world, p1, p2, act, pars)
 end
 
 function decide_home2work(agent, world, pars, t)
-    if rand() < agent.cov_experience ^ (1/pars.caution_work)
-        return
-    end
+    #if rand() < agent.cov_experience ^ (1/pars.caution_work)
+    #    return
+    #end
     if t < 11*60 && rand() < (t - 7*60) / 150
         go_to_work!(agent, world, pars)
     end
@@ -16,8 +16,8 @@ function decide_home2work(agent, world, pars, t)
 end
 
 function decide_work2home(agent, world, pars, t)
-    if rand() < agent.cov_experience ^ (1/pars.caution_work) ||
-            rand() < (t - 16.5*60) / 90
+    #if rand() < agent.cov_experience ^ (1/pars.caution_work) ||
+    if        rand() < (t - 16.5*60) / 90
         go_home!(agent, world, pars)
     end
     nothing
