@@ -144,16 +144,24 @@ end
 function setup_flexible_schedules!(world, pars)
     workday_home = [
         6*60 => decide_home2work 
-       ]
+        ]
     workday_working = [
         10*60 => decide_work2home
-       ]
+        ]
+    # reset from stay_home
+    anyday_reset = [
+        24*60-(pars.timestep+1) => ((a, w, p, t) -> a.activity = Activity.home)
+        ]
 
-    sched = Schedule(FlexibleDaySched, 6)
+    sched = Schedule(FlexibleDaySched, 7)
 
     for day in 1:5
         sched.at[day, Int(Activity.home)] = workday_home
         sched.at[day, Int(Activity.working)] = workday_working
+    end
+    
+    for day in 1:7
+        sched.at[day, Int(Activity.stay_home)] = anyday_reset
     end
 
     push!(world.schedules, sched)

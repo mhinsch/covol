@@ -24,7 +24,7 @@ add_agent!(place, agent) = push!(place.present, agent)
 remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
 
 
-@enumx Activity home=1 working leisure shopping hospital travel none
+@enumx Activity home=1 working leisure shopping hospital travel stay_home none
 
 @with_kw mutable struct Agent
     # admin, possibly subsume in others
@@ -68,7 +68,7 @@ end
 
 Agent(h, w, schedule) = Agent(Activity.home, h, h, Activity.home, 0, 30, 
     1.0, Immune(IStatus.naive), Virus(), rand(), 
-    rand(), 0.0, 0.0, 0.5, 
+    0.0, 0.0, 0.0, 0.5, 
     [], [], h, w, [], [], 
     schedule)
 

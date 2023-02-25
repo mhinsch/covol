@@ -5,8 +5,12 @@ function get_transports(world, p1, p2, act, pars)
     intersect(t1, t2)
 end
 
+cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.obstinacy)) ^ (1/caution)
+
+
 function decide_home2work(agent, world, pars, t)
-    if rand() < agent.cov_experience ^ (1/pars.caution_work)
+    if rand() < cov_wariness(agent, pars.caution_work)
+        agent.activity = Activity.stay_home
         return
     end
     if t < 11*60 && rand() < (t - 7*60) / 150
@@ -16,16 +20,16 @@ function decide_home2work(agent, world, pars, t)
 end
 
 function decide_work2home(agent, world, pars, t)
-    if rand() < agent.cov_experience ^ (1/pars.caution_work) ||
+    if rand() < cov_wariness(agent, pars.caution_work) ||
             rand() < (t - 16.5*60) / 90
-        go_home!(agent, world, pars)
+        go_home!(agent, world, pars, Activity.stay_home)
     end
     nothing
 end
 
 
 function decide_public_transport(agent, pars)
-    ! (rand() < agent.cov_experience ^ (1/pars.caution_pub_transp))
+    ! (rand() < cov_wariness(agent, pars.caution_pub_transp))
 end
 
 
@@ -35,10 +39,10 @@ function go_to_work!(agent, world, pars)
     travel!(agent, agent.work, Activity.working, world, pars)
 end
 
-function go_home!(agent, world, pars)
+function go_home!(agent, world, pars, plan = Activity.home)
     @assert agent.activity == Activity.working
 
-    travel!(agent, agent.home, Activity.home, world, pars)
+    travel!(agent, agent.home, plan, world, pars)
 end
 
 "start agent travel"

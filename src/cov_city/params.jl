@@ -49,6 +49,10 @@ using Parameters
   
     "time steps between experience updates"
     dt_exp			:: Int				= 60 * 24 - 1 # once per day
+    
+    "initial range of obstinacy"
+    obst_range		:: Vector{Float64}	= [0.0, 1.0]
+    
     "decay in covid experience if noone is sick"
     exp_decay		:: Float64			= 0.1
     "weight of own covid experience"
