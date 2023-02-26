@@ -5,7 +5,7 @@ function get_transports(world, p1, p2, act, pars)
     intersect(t1, t2)
 end
 
-cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.obstinacy)) ^ (1/caution)
+cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.recklessness)) ^ (1/caution)
 
 function decide_home2leisure(agent, world, pars, t)
     if rand() < cov_wariness(agent, pars.caution_leisure)
@@ -92,21 +92,16 @@ end
 # TODO diminishing returns for higher numbers friends/family
 function covid_experience!(agent, world, pars)
     delta = - agent.cov_experience * pars.exp_decay 
+    
     if sick(agent)
         delta += (1.0 - agent.cov_experience) * pars.exp_self_weight
     end
     
-    for a in agent.family 
-        if sick(a)
-            delta += (1.0 - agent.cov_experience) * pars.exp_family_weight
-        end
-    end
+    ps = count(sick, agent.family) / length(agent.family)
+    delta += (1.0 - agent.cov_experience) * pars.exp_family_weight * ps
 
-    for a in agent.friends
-        if sick(a)
-            delta += (1.0 - agent.cov_experience) * pars.exp_friends_weight
-        end
-    end
+    ps = count(sick, agent.friends) / length(agent.friends)
+    delta += (1.0 - agent.cov_experience) * pars.exp_friends_weight * ps
     
     agent.cov_experience = max(min(agent.cov_experience + delta, 1.0), 0.0)
 end
