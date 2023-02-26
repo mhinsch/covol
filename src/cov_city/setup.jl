@@ -1,4 +1,5 @@
 using Distributions
+using Erdos: erdos_renyi, edges, src, dst
 
 function get_rnd_empty_house(houses)
     while true
@@ -11,7 +12,7 @@ end
     
 
 function create_world(pars)
-    map = [ Place(PlaceT.nowhere, Pos(x, y), []) for x in 1:pars.x_size, y in 1:pars.y_size ]
+    map = [ Place(PlaceT.nowhere, Pos(x, y)) for x in 1:pars.x_size, y in 1:pars.y_size ]
 
     houses = Vector{Vector{Place}}()
 
@@ -101,7 +102,7 @@ function setup_transport!(world, pars)
     for i in 1:pars.n_transport
         t = Transport(rand(world.map), rand(world.map), [], pars.car_cap)
         for c in 1:pars.n_cars
-            push!(t.cars, Place(PlaceT.transport, Pos(0, 0), []))
+            push!(t.cars, Place(PlaceT.transport, Pos(0, 0)))
         end
         push!(world.transports, t)
 
@@ -194,7 +195,8 @@ function create_agents!(world, n_agents, pars)
         
         push!(world.pop, agent)
     end
-
+    
+    
     # TODO shops, fun
 end
 
@@ -206,8 +208,23 @@ function setup_social!(world, pars)
             push!(a1.family, a2)
         end
     end
-
-    # TODO friends
+    
+    n_a = length(world.pop)
+    n_conn = rand(Binomial(n_a*(n_a-1)÷2, pars.mean_n_friends/n_a))
+   
+    for i in 1:n_conn
+        while true
+            a = rand(world.pop)
+            b = rand(world.pop)
+            if a!=b && !(a in b.family) && !(a in b.friends)
+                push!(a.friends, b)
+                push!(b.friends, a)
+                break
+            end
+        end
+    end
+    
+    println("#friends: ", sum(a -> length(a.friends), world.pop)/length(world.pop))
 end
 
 

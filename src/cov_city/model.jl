@@ -7,6 +7,17 @@ end
 
 cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.obstinacy)) ^ (1/caution)
 
+function decide_home2leisure(agent, world, pars, t)
+    if rand() < cov_wariness(agent, pars.caution_leisure)
+        agent.activity = Activity.stay_home
+        return
+    end
+    if t < 11*60 && rand() < (t - 7*60) / 150
+        go_to_work!(agent, world, pars)
+    end
+    nothing
+end
+    
 
 function decide_home2work(agent, world, pars, t)
     if rand() < cov_wariness(agent, pars.caution_work)
@@ -132,7 +143,10 @@ function infection!(place, world, pars, iefpars)
     end
 
     for e in n_enc
-        encounter!(rand(inf), rand(susc), world.ief, pars, iefpars)
+        if encounter!(rand(inf), rand(susc), world.ief, pars, iefpars)
+            place.n_infections += 1
+        end
     end
+    nothing
 end
 

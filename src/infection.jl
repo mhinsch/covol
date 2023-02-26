@@ -24,7 +24,9 @@ function encounter!(inf, susc, ief, pars, iefpars)
 
     if rand() < p_inf
         infect!(susc, inf.virus, ief, pars, iefpars)
+        return true
     end
+    false
 end
 
 

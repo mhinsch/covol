@@ -1,6 +1,6 @@
 using EnumX
-using Parameters
 using Distributions
+using Base: @kwdef
 
 using DailySchedule
 using IEFModel
@@ -16,7 +16,10 @@ mutable struct PlaceG{AG}
     type :: PlaceT.T
     pos :: Pos
     present :: Vector{AG}
+    n_infections :: Int
 end
+
+PlaceG{AG}(t, p) where {AG} = PlaceG{AG}(t, p, [], 0)
 
 isnowhere(place) = place.type == PlaceT.nowhere
 
@@ -26,16 +29,15 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
 
 @enumx Activity home=1 working leisure shopping hospital travel stay_home none
 
-@with_kw mutable struct Agent
+@kwdef mutable struct Agent
     home 		:: PlaceG{Agent}
     work 		:: PlaceG{Agent}
     family 		:: Vector{Agent}	= []
     friends 	:: Vector{Agent}	= []
-    shops 		:: Vector{PlaceG{Agent}} = []
+#    shops 		:: Vector{PlaceG{Agent}} = []
     fun 		:: Vector{PlaceG{Agent}} = []
     
     schedule 	:: Schedule
-    # admin, possibly subsume in others
     activity	:: Activity.T		= Activity.home
     loc 		:: PlaceG{Agent}	= home
     dest 		:: PlaceG{Agent}	= home
@@ -74,7 +76,7 @@ susceptible(agent) = !infectious(agent)
 
 const Place = PlaceG{Agent}
 
-const Nowhere = Place(PlaceT.nowhere, Pos(-1, -1), [])
+const Nowhere = Place(PlaceT.nowhere, Pos(-1, -1), [], 0)
 
 function change_loc!(agent, new_loc)
     if agent.loc != Nowhere

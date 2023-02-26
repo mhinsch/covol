@@ -25,7 +25,10 @@ using Parameters
     n_smarkets      :: Int              = 50
     "number of leisure buildings"
     n_leisure       :: Int              = 50
-
+   
+    "mean number of friends per agent" 
+    mean_n_friends		:: Float64		= 15
+   
     "number of transport connections"
     n_transport     :: Int              = 100
     "number of carriages per transport"
@@ -47,14 +50,13 @@ using Parameters
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
   
-    "time steps between experience updates"
-    dt_exp			:: Int				= 60 * 24 - 1 # once per day
-    
     "initial range of obstinacy"
     obst_range		:: Vector{Float64}	= [0.0, 1.0]
     "initial range of risk"
     risk_range		:: Vector{Float64}	= [0.0, 1.0]
     
+    "time steps between experience updates"
+    dt_exp			:: Int				= 60 * 24 - 1 # once per day
     "decay in covid experience if noone is sick"
     exp_decay		:: Float64			= 0.1
     "weight of own covid experience"
@@ -67,6 +69,8 @@ using Parameters
     caution_work 	:: Float64			= 1.0
     "how cautious to be about taking public transport"
     caution_pub_transp :: Float64		= 2.0
+    "how cautious to be about going to leisure activities"
+    caution_leisure	:: Float64			= 1.0
 
     "length of a time step in minutes"
     timestep        :: Int              = 15
