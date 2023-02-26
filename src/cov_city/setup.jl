@@ -149,6 +149,12 @@ function setup_flexible_schedules!(world, pars)
     workday_working = [
         10*60 => decide_work2home
         ]
+    weekend_home = [
+        10*60 => decide_home2leisure
+        ]
+    weekend_leisure = [
+        12*60 => decide_leisure2home
+        ]
     # reset from stay_home
     anyday_reset = [
         24*60-(pars.timestep+1) => ((a, w, p, t) -> a.activity = Activity.home)
@@ -159,6 +165,11 @@ function setup_flexible_schedules!(world, pars)
     for day in 1:5
         sched.at[day, Int(Activity.home)] = workday_home
         sched.at[day, Int(Activity.working)] = workday_working
+    end
+    
+    for day in 6:7
+        sched.at[day, Int(Activity.home)] = weekend_home
+        sched.at[day, Int(Activity.leisure)] = weekend_leisure
     end
     
     for day in 1:7
@@ -191,13 +202,18 @@ function create_agents!(world, n_agents, pars)
         add_agent!(home, agent)
         
         agent.risk = rand() * (pars.risk_range[2]-pars.risk_range[1]) + pars.risk_range[1]
+        agent.recklessness = rand() * (pars.reck_range[2]-pars.reck_range[1]) + pars.reck_range[1]
         agent.obstinacy = rand() * (pars.obst_range[2]-pars.obst_range[1]) + pars.obst_range[1]
+        
+        for i in 1:pars.n_leisure_pp
+            push!(agent.fun, rand(world.houses[Int(PlaceT.leisure)]))
+        end
         
         push!(world.pop, agent)
     end
     
     
-    # TODO shops, fun
+    # TODO shops 
 end
 
 
@@ -224,7 +240,7 @@ function setup_social!(world, pars)
         end
     end
     
-    println("#friends: ", sum(a -> length(a.friends), world.pop)/length(world.pop))
+    #println("#friends: ", sum(a -> length(a.friends), world.pop)/length(world.pop))
 end
 
 

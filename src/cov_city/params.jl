@@ -28,6 +28,8 @@ using Parameters
    
     "mean number of friends per agent" 
     mean_n_friends		:: Float64		= 15
+    "number of different leisure places people go to"
+    n_leisure_pp		:: Int			= 5
    
     "number of transport connections"
     n_transport     :: Int              = 100
@@ -50,6 +52,8 @@ using Parameters
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
   
+    "initial range of recklessness"
+    reck_range		:: Vector{Float64}	= [0.0, 1.0]
     "initial range of obstinacy"
     obst_range		:: Vector{Float64}	= [0.0, 1.0]
     "initial range of risk"

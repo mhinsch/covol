@@ -55,7 +55,9 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
     # might not be needed / part of immune status
     "prior physiological risk"
     risk 		:: Float64			= 0.0
-
+    
+    "tendency to ignore covid experience"
+    recklessness :: Float64			= 0.0
     "tendency to refuse official advice"
     obstinacy 	:: Float64			= 0.0
     "seen or experienced Covid"

@@ -7,7 +7,11 @@ end
 
 cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.recklessness)) ^ (1/caution)
 
+
+# TODO
 function decide_home2leisure(agent, world, pars, t)
+    return
+    
     if rand() < cov_wariness(agent, pars.caution_leisure)
         agent.activity = Activity.stay_home
         return
@@ -18,6 +22,9 @@ function decide_home2leisure(agent, world, pars, t)
     nothing
 end
     
+function decide_leisure2home(agent, world, pars, t)
+    return
+end
 
 function decide_home2work(agent, world, pars, t)
     if rand() < cov_wariness(agent, pars.caution_work)
@@ -50,8 +57,14 @@ function go_to_work!(agent, world, pars)
     travel!(agent, agent.work, Activity.working, world, pars)
 end
 
+function go_to_leisure!(agent, world, pars)
+    @assert agent.activity == Activity.home
+
+    travel!(agent, rand(agent.fun), Activity.leisure, world, pars)
+end
+
 function go_home!(agent, world, pars, plan = Activity.home)
-    @assert agent.activity == Activity.working
+    @assert agent.activity == Activity.working || agent.activity == Activity.leisure
 
     travel!(agent, agent.home, plan, world, pars)
 end
