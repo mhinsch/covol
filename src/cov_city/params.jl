@@ -52,6 +52,8 @@ using Parameters
     
     "initial range of obstinacy"
     obst_range		:: Vector{Float64}	= [0.0, 1.0]
+    "initial range of risk"
+    risk_range		:: Vector{Float64}	= [0.0, 1.0]
     
     "decay in covid experience if noone is sick"
     exp_decay		:: Float64			= 0.1

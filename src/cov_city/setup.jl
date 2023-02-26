@@ -189,6 +189,9 @@ function create_agents!(world, n_agents, pars)
         agent = Agent(home, work, rand(world.schedules))
         add_agent!(home, agent)
         
+        agent.risk = rand() * (pars.risk_range[2]-pars.risk_range[1]) + pars.risk_range[1]
+        agent.obstinacy = rand() * (pars.obst_range[2]-pars.obst_range[1]) + pars.obst_range[1]
+        
         push!(world.pop, agent)
     end
 
