@@ -27,7 +27,7 @@ add_agent!(place, agent) = push!(place.present, agent)
 remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
 
 
-@enumx Activity home=1 working leisure shopping hospital travel stay_home none
+@enumx Activity home=1 prepare_work working prepare_leisure leisure travel stay_home none
 
 @kwdef mutable struct Agent
     home 		:: PlaceG{Agent}
@@ -42,6 +42,7 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
     loc 		:: PlaceG{Agent}	= home
     dest 		:: PlaceG{Agent}	= home
     plan 		:: Activity.T		= Activity.home
+    t_next_act	:: Int				= 0
 #    "socio economic status"
 #    soc_status 	:: Int				= 0
 #    age :: Float64

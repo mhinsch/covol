@@ -104,9 +104,9 @@ function main(par_overrides...)
      #       labels = ["inf houses", "inf transp", "mean ief", "max ief"],
             labels = ["mean ief", "max ief"],
             fontsize = floor(Int, 15 * scale))
-
-        date = Date(2020) + Week(model.week) + Day(model.day)
-        RL.DrawText("$(date) $(model.time/60)", 0, 
+            
+        date = Date(2020, 1, 5) + Week(model.week) + Day(model.day)
+        RL.DrawText("$(dayabbr(date)), $(date) $(model.time/60)", 0, 
                     screenHeight - floor(Int, 20 * scale), 
                     floor(Int, 20 * scale), RL.BLACK)
 
@@ -115,7 +115,7 @@ function main(par_overrides...)
 
     RL.CloseWindow()
 
-    close(logfile)
+#    close(logfile)
 end
 
 if ! isinteractive()

@@ -51,6 +51,11 @@ using Parameters
     p_inf           :: Vector{Float64}  = [1.0, 1.0, 1.0, 1.0]
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
+ 
+    "probability to do a leisure activity on a weekend day" 
+    p_leisure_we	:: Float64			= 0.25
+    "time a leisure activity takes"
+    t_leisure		:: Vector{Int}		= [60, 300]
   
     "initial range of recklessness"
     reck_range		:: Vector{Float64}	= [0.0, 1.0]

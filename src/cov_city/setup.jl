@@ -115,7 +115,8 @@ function setup_transport!(world, pars)
 end
 
 
-function setup_schedules!(world, pars)
+# deprecated
+#=function setup_schedules!(world, pars)
     SI = SchedItem
     workday_home = [
         6*60 => SI(0.1 => go_to_work!), 
@@ -140,40 +141,28 @@ function setup_schedules!(world, pars)
 
     push!(world.schedules, sched)
 end
-
+=#
 
 function setup_flexible_schedules!(world, pars)
-    workday_home = [
-        6*60 => decide_home2work 
-        ]
-    workday_working = [
-        10*60 => decide_work2home
-        ]
-    weekend_home = [
-        10*60 => decide_home2leisure
-        ]
-    weekend_leisure = [
-        12*60 => decide_leisure2home
-        ]
-    # reset from stay_home
-    anyday_reset = [
-        24*60-(pars.timestep+1) => ((a, w, p, t) -> a.activity = Activity.home)
-        ]
-
-    sched = Schedule(FlexibleDaySched, 7)
+    sched = Schedule(FlexibleDaySched, n_instances(Activity.T)-1) # none has no schedules
 
     for day in 1:5
-        sched.at[day, Int(Activity.home)] = workday_home
-        sched.at[day, Int(Activity.working)] = workday_working
+        sched.at[day, Int(Activity.home)] 			= [ 7*60 => decide_home2work  ]
+        sched.at[day, Int(Activity.prepare_work)] 	= [ 8*60 => check_go_to_work ]
+        sched.at[day, Int(Activity.working)] 		= [ 16*60 => decide_work2home ]
     end
     
     for day in 6:7
-        sched.at[day, Int(Activity.home)] = weekend_home
-        sched.at[day, Int(Activity.leisure)] = weekend_leisure
+        sched.at[day, Int(Activity.home)] 			= [ 10*60 => decide_home2leisure ]
+        sched.at[day, Int(Activity.prepare_leisure)]= [ 11*60 => check_go_to_leisure ]
+        sched.at[day, Int(Activity.leisure)] 		= [ 11*60 => decide_leisure2home ]
     end
     
+    # decide on stay home each day
     for day in 1:7
-        sched.at[day, Int(Activity.stay_home)] = anyday_reset
+        sched.at[day, Int(Activity.stay_home)] =  [
+            24*60-(pars.timestep+1) => ((a, w, p, t) -> a.activity = Activity.home)
+            ]    
     end
 
     push!(world.schedules, sched)

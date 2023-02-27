@@ -8,22 +8,30 @@ end
 cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.recklessness)) ^ (1/caution)
 
 
-# TODO
 function decide_home2leisure(agent, world, pars, t)
-    return
-    
     if rand() < cov_wariness(agent, pars.caution_leisure)
         agent.activity = Activity.stay_home
         return
     end
-    if t < 11*60 && rand() < (t - 7*60) / 150
-        go_to_work!(agent, world, pars)
+    
+    # wait half an hour, then leave at some point within 5 hours
+    agent.t_next_act = t + rand(1:300) + 30
+    agent.activity = Activity.prepare_leisure
+    nothing
+end
+
+function check_go_to_leisure(agent, world, pars, t)
+    if t >= agent.t_next_act
+        go_to_leisure!(agent, world, pars, t)
     end
     nothing
 end
     
 function decide_leisure2home(agent, world, pars, t)
-    return
+    if t >= agent.t_next_act
+        go_home!(agent, world, pars, Activity.stay_home)
+    end
+    nothing    
 end
 
 function decide_home2work(agent, world, pars, t)
@@ -31,15 +39,21 @@ function decide_home2work(agent, world, pars, t)
         agent.activity = Activity.stay_home
         return
     end
-    if t < 11*60 && rand() < (t - 7*60) / 150
+    
+    agent.t_next_act = t + rand(1:120) + 60
+    agent.activity = Activity.prepare_work
+    nothing
+end
+
+function check_go_to_work(agent, world, pars, t)
+    if t >= agent.t_next_act
         go_to_work!(agent, world, pars)
     end
     nothing
 end
 
 function decide_work2home(agent, world, pars, t)
-    if rand() < cov_wariness(agent, pars.caution_work) ||
-            rand() < (t - 16.5*60) / 90
+    if  rand() < (t - 16.5*60) / 90
         go_home!(agent, world, pars, Activity.stay_home)
     end
     nothing
@@ -52,14 +66,15 @@ end
 
 
 function go_to_work!(agent, world, pars)
-    @assert agent.activity == Activity.home
+    @assert agent.activity == Activity.prepare_work
 
     travel!(agent, agent.work, Activity.working, world, pars)
 end
 
-function go_to_leisure!(agent, world, pars)
-    @assert agent.activity == Activity.home
-
+function go_to_leisure!(agent, world, pars, t)
+    @assert agent.activity == Activity.prepare_leisure
+    
+    agent.t_next_act = t + rand(pars.t_leisure[1]:pars.t_leisure[2])
     travel!(agent, rand(agent.fun), Activity.leisure, world, pars)
 end
 
