@@ -56,16 +56,16 @@ mutable struct Schedule{DSCHED}
 end
 
 "Allocate a schedule for 7 days and a given number of potential states."
-function Schedule(n_activities::Int)
-    sched = [ DaySched() for day in 1:7, activ in 1:n_activities ]
+function Schedule{DSCHED}(n_activities::Int) where {DSCHED} 
+    sched = [ DSCHED() for day in 1:7, activ in 1:n_activities ]
     Schedule(sched)
 end 
 
 "Allocate a schedule for 7 days and a given number of potential states."
-function Schedule(factory, n_activities::Int)
-    sched = [ factory() for day in 1:7, activ in 1:n_activities ]
-    Schedule(sched)
+function Schedule(n_activities::Int)
+    Schedule{DaySched}(n_activities)
 end 
+
 
 "Apply the last schedule item in `sched` that has a time point earlier than `time`."
 function apply_day_schedule!(agent, world, pars, sched, time)

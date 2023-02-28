@@ -112,7 +112,7 @@ mutable struct World
     pop :: Vector{Agent}
     transports :: Vector{Transport}
     t_cache :: Matrix{Vector{Transport}}
-    schedules :: Vector{Schedule}
+    schedules :: Vector{Schedule{FlexibleDaySched}}
     ief :: IEF
 end
 

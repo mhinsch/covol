@@ -144,7 +144,7 @@ end
 =#
 
 function setup_flexible_schedules!(world, pars)
-    sched = Schedule(FlexibleDaySched, n_instances(Activity.T)-1) # none has no schedules
+    sched = Schedule{FlexibleDaySched}(n_instances(Activity.T)-1) # none has no schedules
 
     for day in 1:5
         sched.at[day, Int(Activity.home)] 			= [ 7*60 => decide_home2work  ]
