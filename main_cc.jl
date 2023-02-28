@@ -4,20 +4,41 @@ include("analysis_cc.jl")
 
 using Random
 
-const (pars, iefpars), args = load_parameters(ARGS, (Params, IEFParams))
+
+function setup_logs()
+    file = open("data.tsv", "w")
+
+    print_header(file, Data)
+
+    file
+end
+
+
+function run(model, pars, iefpars, log_freq, log_file = nothing)
+    for i in 1:pars.n_steps
+        step!(model, pars, iefpars)
+        if (i-1) % log_freq == 0
+            data = observe(Data, model.world)
+            ticker(model, data)
+            if log_file != nothing
+                log_results(log_file, data)
+            end
+        end
+    end
+end
+
+
+const (pars, iefpars), args = load_parameters(ARGS, (Params, IEFParams), 
+    ["--log-freq"],
+    Dict(:help => "set time steps between log calls", :default => 1, :arg_type => Int))
 
 Random.seed!(pars.seed)
 
 const model = setup_model(pars, iefpars)
+const log_freq = args[:log_freq]
+const log_file = setup_logs()
 
-function run(model, pars, iefpars)
-    for i in 1:pars.n_steps
-        step!(model, pars, iefpars)
-        data = observe(Data, model.world)
-        ticker(model, data)
-    end
-end
 
 if !isinteractive()
-    run(model, pars, iefpars)
+    @time run(model, pars, iefpars, log_freq, log_file)
 end

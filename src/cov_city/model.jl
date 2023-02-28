@@ -1,8 +1,27 @@
+macro static_var(init)
+  var = gensym()
+  Base.eval(__module__, :(const $var = $init))
+  quote
+    global $var
+    $var
+  end |> esc
+end
+
+
 function get_transports(world, p1, p2, act, pars)
     t1 = world.t_cache[p1.pos.x, p1.pos.y]
     t2 = world.t_cache[p2.pos.x, p2.pos.y]
-
-    intersect(t1, t2)
+   
+    inters = @static_var Transport[]
+    empty!(inters)
+    
+    for t in t1
+        if t in t2
+            push!(inters, t)
+        end
+    end
+    
+    inters
 end
 
 cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.recklessness)) ^ (1/caution)
@@ -134,10 +153,15 @@ function covid_experience!(agent, world, pars)
     agent.cov_experience = max(min(agent.cov_experience + delta, 1.0), 0.0)
 end
 
+
 # done globally for now
 # TODO take into account viral load
 function infection!(place, world, pars, iefpars)
-    inf = Agent[]; susc = Agent[]
+    inf = @static_var Agent[]
+    susc = @static_var Agent[]
+    empty!(inf)
+    empty!(susc)
+    
     for a in place.present
         if infectious(a)
             push!(inf, a)
