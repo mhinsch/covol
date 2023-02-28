@@ -114,6 +114,9 @@ mutable struct World
     t_cache :: Matrix{Vector{Transport}}
     schedules :: Vector{Schedule{FlexibleDaySched}}
     ief :: IEF
+    
+    require_masks :: Bool
+    lockdown :: Bool
 end
 
 

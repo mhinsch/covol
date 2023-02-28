@@ -7,6 +7,9 @@ using Parameters
     "randum seed"
     seed            :: Int              = 42
 
+    "length of a time step in minutes"
+    timestep        :: Int              = 15
+    
     "number of houses in x direction"
     x_size          :: Int              = 100
     "number of houses in y direction"
@@ -48,7 +51,7 @@ using Parameters
     p_encounter     :: Float64          = 0.01
     p_inf_base      :: Float64          = 0.05
     "probability to become infected after exposure"
-    p_inf           :: Vector{Float64}  = [1.0, 1.0, 1.0, 1.0]
+    p_inf           :: Vector{Float64}  = [1.0, 0.0, 0.2, 0.2]
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
  
@@ -80,7 +83,10 @@ using Parameters
     caution_pub_transp :: Float64		= 2.0
     "how cautious to be about going to leisure activities"
     caution_leisure	:: Float64			= 1.0
-
-    "length of a time step in minutes"
-    timestep        :: Int              = 15
+    
+    masks_trigger	:: Float64			= 0.1
+    masks_effect	:: Float64			= 0.5
+    lockdown_trigger:: Float64			= 0.3
+    lockdown_sev	:: Int				= 1
+    policy_check_dt :: Int				= 60 * 24 - 1
 end

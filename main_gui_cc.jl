@@ -105,6 +105,16 @@ function main(par_overrides...)
             labels = ["mean ief", "max ief"],
             fontsize = floor(Int, 15 * scale))
             
+        if model.world.require_masks
+            RL.DrawText("MASKS", 0, 
+                    screenHeight - floor(Int, 3 * 20 * scale), 
+                    floor(Int, 20 * scale), RL.RED)
+        end
+        if model.world.lockdown
+            RL.DrawText("LOCKDOWN", 0, 
+                    screenHeight - floor(Int, 2 * 20 * scale), 
+                    floor(Int, 20 * scale), RL.RED)
+        end
         date = Date(2020, 1, 5) + Week(model.week) + Day(model.day)
         RL.DrawText("$(dayabbr(date)), $(date) $(model.time/60)", 0, 
                     screenHeight - floor(Int, 20 * scale), 

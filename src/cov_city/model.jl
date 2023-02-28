@@ -28,7 +28,8 @@ cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.recklessness
 
 
 function decide_home2leisure(agent, world, pars, t)
-    if rand() < cov_wariness(agent, pars.caution_leisure)
+    if rand() < cov_wariness(agent, pars.caution_leisure) ||
+        (world.lockdown && rand() > agent.obstinacy)
         agent.activity = Activity.stay_home
         return
     end
@@ -54,7 +55,8 @@ function decide_leisure2home(agent, world, pars, t)
 end
 
 function decide_home2work(agent, world, pars, t)
-    if rand() < cov_wariness(agent, pars.caution_work)
+    if rand() < cov_wariness(agent, pars.caution_work) ||
+        (world.lockdown && rand() > agent.obstinacy)
         agent.activity = Activity.stay_home
         return
     end
@@ -190,10 +192,22 @@ function infection!(place, world, pars, iefpars)
     end
 
     for e in n_enc
-        if encounter!(rand(inf), rand(susc), world.ief, pars, iefpars)
+        ai = rand(inf)
+        as = rand(susc)
+        mitigation = world.require_masks && rand() > ai.obstinacy ?
+            pars.masks_effect : 0.0
+            
+        if encounter!(ai, as, world.ief, mitigation, pars, iefpars)
             place.n_infections += 1
         end
     end
     nothing
 end
 
+
+function check_policies!(world, pars)
+    prop_inf = count(infectious, world.pop) / length(world.pop)
+    
+    world.require_masks = prop_inf > pars.masks_trigger
+    world.lockdown = prop_inf > pars.lockdown_trigger
+end

@@ -33,5 +33,9 @@ function step!(model, pars, iefpars)
             covid_experience!(agent, world, pars)
         end
     end
+    
+    if model.time % pars.policy_check_dt == 0
+    	check_policies!(world, pars)
+	end
 end
         
