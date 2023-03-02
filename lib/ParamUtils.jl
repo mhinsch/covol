@@ -81,6 +81,18 @@ function Base.parse(::Type{Rational{T}}, s::AbstractString) where {T}
     Rational{T}(parse(T, nums[1]), parse(T, nums[2]))
 end
 
+function ArgParse.parse_item(::Type{Vector{T}}, s::AbstractString) where {T}
+    parse(Vector{T}, s)
+end
+
+"parse arrays of parseable types"
+function Base.parse(::Type{T}, s::AbstractString) where {T<:AbstractArray}
+	s1 = replace(s, r"[\[\]]"=>"")
+	s2 = replace(s1, ','=>' ')
+	s3 = split(s2)
+	parse.(eltype(T), s3)
+end
+
 function Base.parse(::Type{Array{T, 2}}, value::Vector{String}) where {T<:Number}
     # matrizes come back as [ "1 2 ; 3 4" ]
     str = value[1]
@@ -164,15 +176,6 @@ function pars_to_dict(parameters...)
     end
 
     dict
-end
-
-# TODO not sure if this is still needed
-"parse arrays of parseable types"
-function Base.parse(::Type{T}, s::AbstractString) where {T<:AbstractArray}
-	s1 = replace(s, r"[\[\]]"=>"")
-	s2 = replace(s1, ','=>' ')
-	s3 = split(s2)
-	parse.(eltype(T), s3)
 end
 
 
