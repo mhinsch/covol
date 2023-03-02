@@ -31,6 +31,7 @@ end
     @for person in world.pop begin
         @stat("n_inf", CountAcc) <| (person.immune.status == IStatus.infected)
         @stat("n_rec", CountAcc) <| (person.immune.status == IStatus.recovered)
+        @stat("exp", MVA, MMA) <| person.cov_experience
     end
 
     @for inf in Iterators.filter(p->infectious(p), world.pop) begin

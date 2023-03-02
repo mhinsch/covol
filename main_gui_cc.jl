@@ -47,10 +47,10 @@ function main(par_overrides...)
     )
 
     # create graph objects with colour
-    #graph_ihouses = Graph{Float64}(RL.BLUE)
+    graph_mean_exp = Graph{Float64}(RL.BLUE)
+    graph_max_exp = Graph{Float64}(RL.RED)
     graph_ipersons = Graph{Float64}(RL.RED)
     graph_rec = Graph{Float64}(RL.DARKGREEN)
-    #graph_inf_trans = Graph{Float64}(RL.PURPLE)
     graph_ief_mn = Graph{Float64}(RL.BLACK)
     graph_ief_mx = Graph{Float64}(RL.WHITE)
 
@@ -66,10 +66,10 @@ function main(par_overrides...)
                 data = observe(Data, model.world)
                 #log_results(logfile, data)
                 # add values to graph objects
-         #       add_value!(graph_ihouses, data.n_inf_houses.n)
+                add_value!(graph_mean_exp, data.exp.mean)
+                add_value!(graph_max_exp, data.exp.max)
                 add_value!(graph_ipersons, data.n_inf.n)
                 add_value!(graph_rec, data.n_rec.n)
-         #       add_value!(graph_inf_trans, data.p_inf_transport.mean)
                 add_value!(graph_ief_mn, data.ief.mean)
                 add_value!(graph_ief_mx, data.ief.max)
             end
@@ -92,20 +92,27 @@ function main(par_overrides...)
         
         RL.BeginMode2D(camera)
         
-        drawModel(model, (x=0, y=0), (x=8, y=8))
+        drawModel(model, (x=0, y=0), (x=7, y=7))
 
         RL.EndMode2D()
 
         # draw graphs
-        draw_graph(floor(Int, screenWidth*2/3), 0, 
-                   floor(Int, screenWidth/3), floor(Int, screenHeight/2) - 30, 
+        draw_graph(floor(Int, screenWidth*1/2), 0, 
+                   floor(Int, screenWidth/4), floor(Int, screenHeight/2) - 30, 
+            [graph_mean_exp, graph_max_exp],
+            single_scale = true, 
+            labels = ["mean exp", "max exp"],
+            fontsize = floor(Int, 15 * scale))
+            
+        draw_graph(floor(Int, screenWidth*3/4), 0, 
+                   floor(Int, screenWidth/4), floor(Int, screenHeight/2) - 30, 
             [graph_ipersons, graph_rec],
             single_scale = true, 
             labels = ["infected", "recovered"],
             fontsize = floor(Int, 15 * scale))
         
-        draw_graph(floor(Int, screenWidth*2/3), floor(Int, screenHeight/2), 
-                   floor(Int, screenWidth/3), floor(Int, screenHeight/2) - 30, 
+        draw_graph(floor(Int, screenWidth*3/4), floor(Int, screenHeight/2), 
+                   floor(Int, screenWidth/4), floor(Int, screenHeight/2) - 30, 
      #       [graph_ihouses, graph_inf_trans, graph_ief_mn, graph_ief_mx],
             [graph_ief_mn, graph_ief_mx],
             single_scale = true, 
