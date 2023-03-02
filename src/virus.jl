@@ -2,7 +2,7 @@ using IEFModel
 
 # TODO replace with proper model
 mutable struct Virus
-    # time since infection
+    # time steps since infection
     age :: Int
     # inter host fitness of infecting strain
     ief_0 :: Float64

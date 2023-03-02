@@ -55,20 +55,24 @@ function main(par_overrides...)
     graph_ief_mx = Graph{Float64}(RL.WHITE)
 
     pause = false
+    steps_per_frame = 1
+    data = observe(Data, model.world)
 #    time = Rational(simPars.startTime)
     while !RL.WindowShouldClose()
 
         if !pause #&& time <= simPars.finishTime
-            step!(model, pars, iefpars)
-            data = observe(Data, model.world)
-            #log_results(logfile, data)
-            # add values to graph objects
-     #       add_value!(graph_ihouses, data.n_inf_houses.n)
-            add_value!(graph_ipersons, data.n_inf.n)
-            add_value!(graph_rec, data.n_rec.n)
-     #       add_value!(graph_inf_trans, data.p_inf_transport.mean)
-            add_value!(graph_ief_mn, data.ief.mean)
-            add_value!(graph_ief_mx, data.ief.max)
+            for s in 1:steps_per_frame
+                step!(model, pars, iefpars)
+                data = observe(Data, model.world)
+                #log_results(logfile, data)
+                # add values to graph objects
+         #       add_value!(graph_ihouses, data.n_inf_houses.n)
+                add_value!(graph_ipersons, data.n_inf.n)
+                add_value!(graph_rec, data.n_rec.n)
+         #       add_value!(graph_inf_trans, data.p_inf_transport.mean)
+                add_value!(graph_ief_mn, data.ief.mean)
+                add_value!(graph_ief_mx, data.ief.max)
+            end
             h = rand(model.world.map)
             println(data.n_inf.n, " ", data.n_inf_houses.n)
         end
@@ -76,6 +80,10 @@ function main(par_overrides...)
         if RL.IsKeyPressed(Raylib.KEY_SPACE)
             pause = !pause
             sleep(0.2)
+        elseif RL.IsKeyPressed(Raylib.KEY_PERIOD)
+            steps_per_frame += 1
+        elseif RL.IsKeyPressed(Raylib.KEY_COMMA)
+            steps_per_frame = max(1, steps_per_frame-1)
         end
 
         RL.BeginDrawing()
