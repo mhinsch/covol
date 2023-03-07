@@ -49,7 +49,9 @@ function main(par_overrides...)
     # create graph objects with colour
     graph_mean_exp = Graph{Float64}(RL.BLUE)
     graph_max_exp = Graph{Float64}(RL.RED)
-    graph_ipersons = Graph{Float64}(RL.RED)
+    graph_alarm = Graph{Float64}(RL.BLACK)
+    graph_asym = Graph{Float64}(RL.BLUE)
+    graph_inf = Graph{Float64}(RL.RED)
     graph_rec = Graph{Float64}(RL.DARKGREEN)
     graph_ief_mn = Graph{Float64}(RL.BLACK)
     graph_ief_mx = Graph{Float64}(RL.WHITE)
@@ -68,7 +70,9 @@ function main(par_overrides...)
                 # add values to graph objects
                 add_value!(graph_mean_exp, data.exp.mean)
                 add_value!(graph_max_exp, data.exp.max)
-                add_value!(graph_ipersons, data.n_inf.n)
+                add_value!(graph_alarm, model.world.alarm)
+                add_value!(graph_asym, data.n_asym.n)
+                add_value!(graph_inf, data.n_inf.n)
                 add_value!(graph_rec, data.n_rec.n)
                 add_value!(graph_ief_mn, data.ief.mean)
                 add_value!(graph_ief_mx, data.ief.max)
@@ -99,16 +103,16 @@ function main(par_overrides...)
         # draw graphs
         draw_graph(floor(Int, screenWidth*1/2), 0, 
                    floor(Int, screenWidth/4), floor(Int, screenHeight/2) - 30, 
-            [graph_mean_exp, graph_max_exp],
+            [graph_mean_exp, graph_max_exp, graph_alarm],
             single_scale = true, 
-            labels = ["mean exp", "max exp"],
+            labels = ["mean exp", "max exp", "alarm"],
             fontsize = floor(Int, 15 * scale))
             
         draw_graph(floor(Int, screenWidth*3/4), 0, 
                    floor(Int, screenWidth/4), floor(Int, screenHeight/2) - 30, 
-            [graph_ipersons, graph_rec],
+            [graph_inf, graph_rec, graph_asym],
             single_scale = true, 
-            labels = ["infected", "recovered"],
+            labels = ["infected", "recovered", "asymptomatic"],
             fontsize = floor(Int, 15 * scale))
         
         draw_graph(floor(Int, screenWidth*3/4), floor(Int, screenHeight/2), 
@@ -120,6 +124,11 @@ function main(par_overrides...)
             labels = ["mean ief", "max ief"],
             fontsize = floor(Int, 15 * scale))
             
+        if model.world.isolation
+            RL.DrawText("ISOLATE", 0, 
+                    screenHeight - floor(Int, 4 * 20 * scale), 
+                    floor(Int, 20 * scale), RL.RED)
+        end
         if model.world.require_masks
             RL.DrawText("MASKS", 0, 
                     screenHeight - floor(Int, 3 * 20 * scale), 

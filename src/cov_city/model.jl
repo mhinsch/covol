@@ -28,7 +28,8 @@ cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.recklessness
 
 
 function decide_home2leisure(agent, world, pars, t)
-    if rand() < cov_wariness(agent, pars.caution_leisure) ||
+    if (sick(agent) && world.isolation && rand() > agent.obstinacy) ||
+        rand() < cov_wariness(agent, pars.caution_leisure) ||
         (world.lockdown && rand() > agent.obstinacy)
         agent.activity = Activity.stay_home
         return
@@ -55,7 +56,8 @@ function decide_leisure2home(agent, world, pars, t)
 end
 
 function decide_home2work(agent, world, pars, t)
-    if rand() < cov_wariness(agent, pars.caution_work) ||
+    if (sick(agent) && world.isolation && rand() > agent.obstinacy) ||
+        rand() < cov_wariness(agent, pars.caution_work) ||
         (world.lockdown && rand() > agent.obstinacy)
         agent.activity = Activity.stay_home
         return
@@ -138,7 +140,7 @@ function arrive!(agent, world, pars)
     agent.plan = Activity.none
 end
 
-# TODO diminishing returns for higher numbers friends/family
+
 function covid_experience!(agent, world, pars)
     delta = - agent.cov_experience * pars.exp_decay 
     
@@ -206,8 +208,16 @@ end
 
 
 function check_policies!(world, pars)
-    prop_inf = count(infectious, world.pop) / length(world.pop)
+    prop_inf = count(sick, world.pop) / length(world.pop)
     
-    world.require_masks = prop_inf > pars.masks_trigger
-    world.lockdown = prop_inf > pars.lockdown_trigger
+    if prop_inf > pars.alarm_inc_thresh
+        world.alarm += (1.0 - world.alarm) * pars.alarm_inc_d
+    end
+    if prop_inf < pars.alarm_dec_thresh
+        world.alarm -= world.alarm * pars.alarm_dec_d
+    end
+    
+    world.require_masks = world.alarm > pars.masks_trigger
+    world.lockdown = world.alarm > pars.lockdown_trigger
+    world.isolation = world.alarm > pars.isolate_trigger
 end

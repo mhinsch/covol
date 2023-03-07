@@ -51,7 +51,9 @@ using Parameters
     p_encounter     :: Float64          = 0.01
     p_inf_base      :: Float64          = 0.05
     "probability to become infected after exposure"
-    p_inf           :: Vector{Float64}  = [1.0, 0.0, 0.2, 0.2]
+    p_inf           :: Vector{Float64}  = [1.0, 0.0, 0.0, 0.2, 0.2]
+    "probability (per time step) to become symptomatic"
+    p_sympt         :: Float64          = 1.0 / (2*24*4)
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
  
@@ -70,7 +72,7 @@ using Parameters
     "time steps between experience updates"
     dt_exp			:: Int				= 60 * 24 - 1 # once per day
     "decay in covid experience if noone is sick"
-    exp_decay		:: Float64			= 0.1
+    exp_decay		:: Float64			= 0.05
     "weight of own covid experience"
     exp_self_weight	:: Float64			= 0.2
     "weight of family covid experience"
@@ -84,6 +86,11 @@ using Parameters
     "how cautious to be about going to leisure activities"
     caution_leisure	:: Float64			= 1.0
     
+    alarm_inc_thresh :: Float64			= 0.1
+    alarm_dec_thresh :: Float64			= 0.1
+    alarm_inc_d		:: Float64			= 0.1
+    alarm_dec_d		:: Float64			= 0.1
+    isolate_trigger :: Float64			= 0.1
     masks_trigger	:: Float64			= 0.1
     masks_effect	:: Float64			= 0.5
     lockdown_trigger:: Float64			= 0.3

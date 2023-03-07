@@ -72,7 +72,7 @@ function create_world(pars)
 
     t_cache = [ Transport[] for x in 1:pars.x_size, y in 1:pars.y_size ]
 
-    World(map, houses, [], [], t_cache, [], IEF([], []), false, false), pop_size
+    World(map, houses, [], [], t_cache, [], IEF([], []), 0.0, false, false, false), pop_size
 end
 
 

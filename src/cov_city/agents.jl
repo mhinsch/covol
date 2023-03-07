@@ -73,8 +73,9 @@ end
 Agent(home, work, schedule) = Agent(;home, work, schedule)
 
 infectivity(agent) = agent.virus.e_ief
-sick(agent) = agent.immune.status == IStatus.infected
-infectious(agent) = agent.immune.status == IStatus.infected
+sick(agent) = agent.immune.status == IStatus.symptomatic
+infectious(agent) = agent.immune.status == IStatus.infected || 
+    agent.immune.status == IStatus.symptomatic
 susceptible(agent) = !infectious(agent)
 
 const Place = PlaceG{Agent}
@@ -115,6 +116,8 @@ mutable struct World
     schedules :: Vector{Schedule{FlexibleDaySched}}
     ief :: IEF
     
+    alarm :: Float64
+    isolation :: Bool
     require_masks :: Bool
     lockdown :: Bool
 end

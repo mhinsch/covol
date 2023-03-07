@@ -29,7 +29,8 @@ end
     end
 
     @for person in world.pop begin
-        @stat("n_inf", CountAcc) <| (person.immune.status == IStatus.infected)
+        @stat("n_inf", CountAcc) <| (infectious(person))
+        @stat("n_asym", CountAcc) <| (person.immune.status == IStatus.infected)
         @stat("n_rec", CountAcc) <| (person.immune.status == IStatus.recovered)
         @stat("exp", MVA, MMA) <| person.cov_experience
     end
