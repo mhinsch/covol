@@ -169,8 +169,8 @@ function setup_flexible_schedules!(world, pars)
 end
 
 
-function setup_ief!(world, iefpars)
-    world.ief = IEFModel.setup_ief(iefpars)
+function setup_ief!(world, pars)
+    world.ief = IEFModel.setup_ief(pars)
 end
 
 function create_agents!(world, n_agents, pars)
@@ -197,6 +197,8 @@ function create_agents!(world, n_agents, pars)
         for i in 1:pars.n_leisure_pp
             push!(agent.fun, rand(world.houses[Int(PlaceT.leisure)]))
         end
+        
+        agent.virus = NoVirus
         
         push!(world.pop, agent)
     end
@@ -235,19 +237,22 @@ end
 
 function initial_infected!(world, pars)
     for i in 1:pars.n_infected
-        inf = rand(world.pop)
-        inf.immune.status = IStatus.infected
-        inf.virus.ief_0 = 1.0
-        inf.virus.e_ief = 1.0
+        while true
+            inf = rand(world.pop)
+            if !infected(inf) 
+                initial_infect!(inf, pars)
+                break
+            end
+        end
     end
 end
 
 
-function setup_model(pars, iefpars)
+function setup_model(pars)
     world, n_agents = create_world(pars)
     setup_transport!(world, pars)
     setup_flexible_schedules!(world, pars)
-    setup_ief!(world, iefpars)
+    setup_ief!(world, pars)
     create_agents!(world, n_agents, pars)
     setup_social!(world, pars)
     initial_infected!(world, pars)

@@ -160,7 +160,7 @@ end
 
 # done globally for now
 # TODO take into account viral load
-function infection!(place, world, pars, iefpars)
+function infection!(place, world, pars)
     inf = @static_var Agent[]
     susc = @static_var Agent[]
     empty!(inf)
@@ -199,7 +199,7 @@ function infection!(place, world, pars, iefpars)
         mitigation = world.require_masks && rand() > ai.obstinacy ?
             pars.masks_effect : 0.0
             
-        if encounter!(ai, as, world.ief, mitigation, pars, iefpars)
+        if encounter!(ai, as, world.ief, mitigation, pars)
             place.n_infections += 1
         end
     end

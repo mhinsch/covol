@@ -23,13 +23,13 @@ function main(par_overrides...)
     end
 
     # need to do that first, otherwise it blocks the GUI
-    (pars, iefpars), args = load_parameters(args, (Params, IEFParams),
+    (pars,), args = load_parameters(args, (AllParams,),
         ["--gui-scale"], 
         Dict(:help => "set gui scale", :default => 1.0, :arg_type => Float64))
 
     Random.seed!(pars.seed)
 
-    model = setup_model(pars, iefpars)
+    model = setup_model(pars)
 #    logfile = setupLogging(simPars)
 
     scale = args[:gui_scale]
@@ -64,7 +64,7 @@ function main(par_overrides...)
 
         if !pause #&& time <= simPars.finishTime
             for s in 1:steps_per_frame
-                step!(model, pars, iefpars)
+                step!(model, pars)
                 data = observe(Data, model.world)
                 #log_results(logfile, data)
                 # add values to graph objects

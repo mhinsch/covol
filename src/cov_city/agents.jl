@@ -50,9 +50,9 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
     "current health"
     health 		:: Float64			= 1.0
     "immune status + history"
-    immune 		:: Immune			= Immune(IStatus.naive)
+    immune_system:: ImmuneSystem	= ImmuneSystem()
     "virus population"
-    virus 		:: Virus			= Virus()
+    virus 		:: AGIEFVirus		= AGIEFVirus()
     # might not be needed / part of immune status
     "prior physiological risk"
     risk 		:: Float64			= 0.0
@@ -72,11 +72,6 @@ end
 
 Agent(home, work, schedule) = Agent(;home, work, schedule)
 
-infectivity(agent) = agent.virus.e_ief
-sick(agent) = agent.immune.status == IStatus.symptomatic
-infectious(agent) = agent.immune.status == IStatus.infected || 
-    agent.immune.status == IStatus.symptomatic
-susceptible(agent) = !infectious(agent)
 
 const Place = PlaceG{Agent}
 

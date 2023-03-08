@@ -1,4 +1,4 @@
-function step!(model, pars, iefpars)
+function step!(model, pars)
     model.time += pars.timestep
 
     if model.time / 60 >= 24
@@ -11,29 +11,35 @@ function step!(model, pars, iefpars)
     end
 
     world = model.world
-
+    
+    #println("activity")
     for agent in world.pop
         activity!(agent, world, model.day, model.time, pars)
     end
 
+    #println("disease")
     for agent in world.pop
-        disease!(agent, world, pars, iefpars)
+        disease!(agent, world, pars)
     end
 
+    #println("infection")
     for house in world.map
-        infection!(house, world, pars, iefpars)
+        infection!(house, world, pars)
     end
 
+    #println("infection II")
     for transp in world.transports, car in transp.cars
-        infection!(car, world, pars, iefpars)
+        infection!(car, world, pars)
     end
     
+    #println("experience")
     if model.time % pars.dt_exp == 0
         for agent in world.pop
             covid_experience!(agent, world, pars)
         end
     end
     
+    #println("policies")
     if model.time % pars.policy_check_dt == 0
     	check_policies!(world, pars)
 	end

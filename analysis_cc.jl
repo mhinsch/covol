@@ -8,7 +8,7 @@ const MMA = MaxMinAcc{Float64}
 function n_infected_transport(t)
     n = 0
     for car in t.cars, p in car.present
-        if p.immune.status == IStatus.infected
+        if infected(p)
             n += 1
         end
     end
@@ -20,7 +20,7 @@ end
         # format:
         # @stat(name, accumulators...) <| expression
         @stat("n_inf_houses", CountAcc) <| 
-            (findfirst(p->p.immune.status == IStatus.infected, house.present) != nothing)
+            (findfirst(infected, house.present) != nothing)
     end
 
     @for transport in world.transports begin
@@ -30,8 +30,8 @@ end
 
     @for person in world.pop begin
         @stat("n_inf", CountAcc) <| (infectious(person))
-        @stat("n_asym", CountAcc) <| (person.immune.status == IStatus.infected)
-        @stat("n_rec", CountAcc) <| (person.immune.status == IStatus.recovered)
+        @stat("n_asym", CountAcc) <| (infected(person))
+        @stat("n_rec", CountAcc) <| (length(person.immune_system) > 1)
         @stat("exp", MVA, MMA) <| person.cov_experience
     end
 

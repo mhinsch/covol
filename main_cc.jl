@@ -14,9 +14,9 @@ function setup_logs()
 end
 
 
-function run(model, pars, iefpars, log_freq, log_file = nothing)
+function run(model, pars, log_freq, log_file = nothing)
     for i in 1:pars.n_steps
-        step!(model, pars, iefpars)
+        step!(model, pars)
         if (i-1) % log_freq == 0
             data = observe(Data, model.world)
             ticker(model, data)
@@ -28,17 +28,17 @@ function run(model, pars, iefpars, log_freq, log_file = nothing)
 end
 
 
-const (pars, iefpars), args = load_parameters(ARGS, (Params, IEFParams), 
+const (pars,), args = load_parameters(ARGS, (AllParams,), 
     ["--log-freq"],
     Dict(:help => "set time steps between log calls", :default => 1, :arg_type => Int))
 
 Random.seed!(pars.seed)
 
-const model = setup_model(pars, iefpars)
+const model = setup_model(pars)
 const log_freq = args[:log_freq]
 const log_file = setup_logs()
 
 
 if !isinteractive()
-    @time run(model, pars, iefpars, log_freq, log_file)
+    @time run(model, pars, log_freq, log_file)
 end

@@ -29,7 +29,7 @@ function drawModel(model, offset, hsize)
         RL.DrawRectangleLinesEx(
             RL.RayRectangle(t_offset.x, t_offset.y, hsize.x-1, hsize.y-1), 1.0, col)
 
-        if findfirst(p->p.immune.status == IStatus.infected, house.present) != nothing
+        if findfirst(infected, house.present) != nothing
             RL.DrawRectangle(t_offset.x+2, t_offset.y+2, hsize.x-4, hsize.y-4, RL.RED)
         elseif isempty(house.present)
             RL.DrawRectangle(t_offset.x+2, t_offset.y+2, hsize.x-4, hsize.y-4, RL.GRAY)
