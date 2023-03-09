@@ -12,7 +12,7 @@ using Parameters
     
     # virus dynamics
     "mutation probability for antigens"
-    pmut_antigens :: Float64 = 5
+    pmut_antigens :: Float64 = 0.1
     "mutation step size for antigens"
     dmut_antigens :: Int = 5
     
@@ -24,7 +24,7 @@ using Parameters
     
     # immune system dynamics
     "immunity increase during infection per time step (factor)"
-    inc_imm :: Float64 = 2.0^(1.0/(4*24))
+    inc_imm :: Float64 = 2.0^(0.5/(4*24))
     "immunity decrease without infection per time step (factor)"
     dec_imm :: Float64 = 0.5^(1.0/(4*24*200))
     "min match needed for immune system to increase immunity"

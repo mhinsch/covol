@@ -29,6 +29,7 @@ end
 function transmit(tr_virus, ief, pars)
     virus = AGIEFVirus(copy(tr_virus.antigens))
     virus.ief_0 = transmitted_ief_factor(tr_virus.age, ief, pars) * tr_virus.ief_0
+    virus.e_ief = virus.ief_0
     
     virus
 end

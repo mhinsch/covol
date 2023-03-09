@@ -18,7 +18,7 @@ function update_immune_system!(imms, antigens, pars)
         update_immunity!(imm, m > pars.inc_imm_threshold, pars)
         # for efficiency we delete weak immunities 
         if imm.strength < pars.del_imm_threshold
-            remove_unsorted!(imms, i)
+            remove_unsorted_at!(imms, i)
         end
         # keep track of "surviving" virus
         s *= 1.0 - (m * imm.strength)

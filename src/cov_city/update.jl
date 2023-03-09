@@ -18,6 +18,9 @@ function step!(model, pars)
     end
 
     #println("disease")
+    # TODO
+    # * delay in immune onset
+    # * frequency of immune update
     for agent in world.pop
         disease!(agent, world, pars)
     end
