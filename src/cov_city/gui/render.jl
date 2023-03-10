@@ -30,9 +30,9 @@ function drawModel(model, offset, hsize)
             RL.RayRectangle(t_offset.x, t_offset.y, hsize.x-1, hsize.y-1), 1.0, col)
 
         if findfirst(infected, house.present) != nothing
-            RL.DrawRectangle(t_offset.x+2, t_offset.y+2, hsize.x-4, hsize.y-4, RL.RED)
+            RL.DrawRectangle(t_offset.x+1, t_offset.y+1, hsize.x-3, hsize.y-3, RL.RED)
         elseif isempty(house.present)
-            RL.DrawRectangle(t_offset.x+2, t_offset.y+2, hsize.x-4, hsize.y-4, RL.GRAY)
+            RL.DrawRectangle(t_offset.x+1, t_offset.y+1, hsize.x-3, hsize.y-3, RL.GRAY)
         end
         
         for p in house.present

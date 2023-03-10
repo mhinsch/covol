@@ -53,6 +53,7 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
     immune_system:: ImmuneSystem	= ImmuneSystem()
     "virus population"
     virus 		:: AGIEFVirus		= AGIEFVirus()
+    immune_strength :: Float64		= 1.0
     # might not be needed / part of immune status
     "prior physiological risk"
     risk 		:: Float64			= 0.0

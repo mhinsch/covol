@@ -23,17 +23,17 @@ using Parameters
     ini_imm_strength :: Float64 = 0.1
     
     # immune system dynamics
+    "minimum match required for immune response to be considered valid"
+    req_match :: Float64 = 0.66
+    "max # of antibodies per agent"
+    max_n_immune :: Int = 20
     "immunity increase during infection per time step (factor)"
-    inc_imm :: Float64 = 2.0^(0.5/(4*24))
+    inc_imm :: Float64 = 2.0^(0.5/(4*24)) # doubles in two days
     "immunity decrease without infection per time step (factor)"
-    dec_imm :: Float64 = 0.5^(1.0/(4*24*200))
+    dec_imm :: Float64 = 0.5^(1.0/(4*24*200)) # halves in 200 days
     "min match needed for immune system to increase immunity"
     inc_imm_threshold :: Float64 = 0.2
     "immune strength below which to delete immunity"
     del_imm_threshold :: Float64 = 0.05
-    
-    # disease dynamics
-    "reaction strength required to remove virus"
-    rec_threshold :: Float64 = 0.9
 end
     

@@ -8,7 +8,6 @@ end
 
 
 function infect!(agent, virus, ief, pars)
-    new_immunity!(agent.immune_system, virus.antigens, pars)
     agent.virus = transmit(virus, ief, pars)
 end
 

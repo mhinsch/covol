@@ -14,6 +14,7 @@ const Antigens = Vector{Int16}
 # immunity buildup/decay
 function update_immunity!(imm, inf, pars)
     imm.strength *= inf ? pars.inc_imm : pars.dec_imm
+    imm.strength = min(1.0, max(0.0, imm.strength))
 end
 
 # point mutation in virus

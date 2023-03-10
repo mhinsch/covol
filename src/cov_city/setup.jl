@@ -236,12 +236,27 @@ end
 
 
 function initial_infected!(world, pars)
-    for i in 1:pars.n_infected
-        while true
-            inf = rand(world.pop)
-            if !infected(inf) 
-                initial_infect!(inf, pars)
-                break
+        
+    if pars.mixed_ini_inf
+        for i in 1:pars.n_infected
+            while true
+                inf = rand(world.pop)
+                if !infected(inf) 
+                    initial_infect!(inf, pars)
+                    break
+                end
+            end
+        end
+    else
+        pat0 = rand(world.pop)
+        initial_infect!(pat0, pars)
+        for i in 1:(pars.n_infected-1)
+            while true
+                inf = rand(world.pop)
+                if !infected(inf) 
+                    infect!(inf, pat0.virus, world.ief, pars)
+                    break
+                end
             end
         end
     end

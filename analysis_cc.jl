@@ -29,14 +29,17 @@ end
     end
 
     @for person in world.pop begin
-        @stat("n_inf", CountAcc) <| (infectious(person))
-        @stat("n_asym", CountAcc) <| (infected(person))
-        @stat("n_rec", CountAcc) <| (length(person.immune_system) > 1)
+        @stat("n_inf", CountAcc) <| (infected(person))
+        @stat("n_sick", CountAcc) <| (sick(person))
+        @stat("n_rec", CountAcc) <| (length(person.immune_system) > 0)
         @stat("exp", MVA, MMA) <| person.cov_experience
+# TODO activity of most active immunity
+#        @if infected(person) @stat("imm", MVA, MMA) <| 
     end
 
     @for inf in Iterators.filter(p->infectious(p), world.pop) begin
         @stat("ief", MVA, MMA) <| inf.virus.ief_0
+        @stat("v_age", MVA, MMA) <| Float64(inf.virus.age)
     end
 end
 

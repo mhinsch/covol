@@ -41,6 +41,7 @@ using Parameters
 
     "initial number of infected agents"
     n_infected      :: Int              = 10
+    mixed_ini_inf	:: Bool				= false
 
     "distance agents are willing to walk to their transport"
     walk_dist       :: Float64          = 3
@@ -50,12 +51,16 @@ using Parameters
     "probability (per time step) for two given agents to encounter each other at a shared location"
     p_encounter     :: Float64          = 0.01
     p_inf_base      :: Float64          = 0.05
-    "probability to become infected after exposure"
-    p_inf           :: Vector{Float64}  = [1.0, 0.0, 0.0, 0.2, 0.2]
+#    "probability to become infected after exposure"
+#    p_inf           :: Vector{Float64}  = [1.0, 0.0, 0.0, 0.2, 0.2]
     "probability (per time step) to become symptomatic"
     p_sympt         :: Float64          = 1.0 / (2*24*4)
     "probability (per time step) to recover"
     p_rec           :: Float64          = 1.0 / (7*24*4)
+    
+    # disease dynamics
+    "reaction strength required to remove virus"
+    rec_threshold :: Float64 = 0.9
  
     "probability to do a leisure activity on a weekend day" 
     p_leisure_we	:: Float64			= 0.25
