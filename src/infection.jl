@@ -2,7 +2,7 @@ using IEFModel
 
 
 function inf_rate(infectee, virus, mitigation, pars)
-    inf_exp = infectee.risk * virus.e_ief * (1.0 - mitigation)
+    inf_exp = infectee.risk + virus.e_ief * (1.0 - mitigation)
     1 - (1 - pars.p_inf_base * p_infection(infectee, pars)) ^ inf_exp
 end
 
