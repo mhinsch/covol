@@ -16,10 +16,13 @@ end
 
 function run(model, pars, log_freq, log_file = nothing)
     for i in 1:pars.n_steps
+        data = observe(Data, model.world, i)
         step!(model, pars)
-        if (i-1) % log_freq == 0
-            data = observe(Data, model.world)
+        if model.time % pars.obs_freq == 0
+            data = observe(Data, model.world, i)
             ticker(model, data)
+        end
+        if model.time % log_freq == 0
             if log_file != nothing
                 log_results(log_file, data)
             end
@@ -30,7 +33,7 @@ end
 
 const (pars,), args = load_parameters(ARGS, (AllParams,), 
     ["--log-freq"],
-    Dict(:help => "set time steps between log calls", :default => 1, :arg_type => Int))
+    Dict(:help => "set time steps between log calls", :default => 23*60, :arg_type => Int))
 
 Random.seed!(pars.seed)
 

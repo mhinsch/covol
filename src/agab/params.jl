@@ -12,9 +12,9 @@ using Parameters
     
     # virus dynamics
     "mutation probability for antigens"
-    pmut_antigens :: Float64 = 0.1
+    pmut_antigens :: Float64 = 0.001
     "mutation step size for antigens"
-    dmut_antigens :: Int = 5
+    dmut_antigens :: Int = 50
     
     # infection
     "stochastic difference between antigen and new antibody"

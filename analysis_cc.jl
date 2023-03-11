@@ -15,7 +15,9 @@ function n_infected_transport(t)
     n
 end
 
-@observe Data world begin
+@observe Data world t begin
+    @record "time" Int t
+    
     @for house in world.map begin
         # format:
         # @stat(name, accumulators...) <| expression
@@ -32,6 +34,7 @@ end
         @stat("n_inf", CountAcc) <| (infected(person))
         @stat("n_sick", CountAcc) <| (sick(person))
         @stat("n_rec", CountAcc) <| (length(person.immune_system) > 0)
+        @stat("n_imm", MVA, MMA, HistAcc(0.0, 1.0)) <| Float64(length(person.immune_system))
         @stat("exp", MVA, MMA) <| person.cov_experience
 # TODO activity of most active immunity
 #        @if infected(person) @stat("imm", MVA, MMA) <| 

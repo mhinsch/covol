@@ -6,7 +6,9 @@ using Parameters
     n_steps         :: Int              = 24 * 4 * 365
     "randum seed"
     seed            :: Int              = 42
-
+   
+    obs_freq		:: Int				= 60
+    
     "length of a time step in minutes"
     timestep        :: Int              = 15
     
@@ -71,6 +73,8 @@ using Parameters
     reck_range		:: Vector{Float64}	= [0.0, 1.0]
     "initial range of obstinacy"
     obst_range		:: Vector{Float64}	= [0.0, 1.0]
+    "proportion of at risk population"
+    p_at_risk		:: Float64			= 0.05
     "initial range of risk"
     risk_range		:: Vector{Float64}	= [0.0, 1.0]
     
