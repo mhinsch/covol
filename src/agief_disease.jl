@@ -35,7 +35,8 @@ function disease!(agent, world, pars)
     reaction = update_immune_system!(agent.immune_system, agent.virus.antigens, pars)
     
     if infected(agent)
-        if reaction > pars.rec_threshold || rand() < pars.p_rec
+        if (reaction * (1.0-agent.risk)) > pars.rec_threshold || 
+            rand() < (pars.p_rec * (1.0-agent.risk))
             recover!(agent, pars)
             return
         elseif !sick(agent) && rand() < pars.p_sympt
