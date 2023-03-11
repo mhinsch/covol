@@ -37,7 +37,8 @@ Graph{T}(col) where {T} = Graph{T}([], typemin(T), typemax(T), col)
 
 function add_value!(graph::Graph, value)
 	push!(graph.data, value)
-	value > graph.max ? (graph.max = value) : (value < graph.min ? (graph.min = value) : value)
+	graph.max = max(value, graph.max)
+    graph.min = min(value, graph.min)
 end
 
 function set_data!(graph::Graph, data; maxm = data[1], minm = data[1])
