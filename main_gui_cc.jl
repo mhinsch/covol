@@ -66,7 +66,7 @@ function main(par_overrides...)
     ancestor = model.world.pop[a_idx].virus.antigens
     pause = false
     steps_per_frame = 1
-    data = observe(Data, model.world)
+    data = observe(Data, model.world, 0)
 #    time = Rational(simPars.startTime)
     while !RL.WindowShouldClose()
 
@@ -74,7 +74,7 @@ function main(par_overrides...)
             for s in 1:steps_per_frame
                 step!(model, pars)
                 if model.time % pars.obs_freq == 0
-                    data = observe(Data, model.world)
+                    data = observe(Data, model.world, model.time)
                     #log_results(logfile, data)
                     # add values to graph objects
                     add_value!(graph_mean_exp, data.exp.mean)
