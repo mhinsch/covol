@@ -6,7 +6,7 @@ using Parameters
     "number of elements in an antibody"
     n_antibodies :: Int = 2
     "number of elements in an antigen"
-    n_antigens :: Int = 20
+    n_antigens :: Int = 5
     "numerical range of antigen/antibody values"
     max_antigen :: Int = 100
     
@@ -14,11 +14,11 @@ using Parameters
     "mutation probability for antigens"
     pmut_antigens :: Float64 = 0.001
     "mutation step size for antigens"
-    dmut_antigens :: Int = 50
+    dmut_antigens :: Int = 100
     
     # infection
     "stochastic difference between antigen and new antibody"
-    stoch_imm :: Int = 2
+    stoch_imm :: Int = 5
     "initial strength value of newly acquired immunity"
     ini_imm_strength :: Float64 = 0.1
     
