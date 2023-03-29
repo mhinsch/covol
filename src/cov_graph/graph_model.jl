@@ -16,6 +16,7 @@ Agent() = Agent(Virus(), Immune(), 1.0, [])
 infectivity(agent) = agent.virus.e_ief
 infectious(agent) = agent.immune.status == IStatus.infected
 susceptible(agent) = !infectious(agent)
+p_infection(agent, pars) = pars.p_inf[Int(agent.immune.status)]
 
 function connect!(ag1, ag2)
     push!(ag1.contacts, ag2)
@@ -42,7 +43,7 @@ function initial_infected!(world, pars)
 end
 
 
-function setup_model(pars, iefpars)
+function setup_model(pars)
     graph = erdos_renyi(pars.n_nodes, pars.mean_k/pars.n_nodes)
 
     agents = [Agent() for i in 1:pars.n_nodes]
@@ -51,7 +52,7 @@ function setup_model(pars, iefpars)
         connect!(agents[src(e)], agents[dst(e)])
     end
 
-    model = Model(World(agents, IEFModel.setup_ief(iefpars)))
+    model = Model(World(agents, IEFModel.setup_ief(pars)))
 
     initial_infected!(model.world, pars)
 
@@ -59,9 +60,9 @@ function setup_model(pars, iefpars)
 end
 
 
-function step!(model, pars, iefpars)
+function step!(model, pars)
     for a in model.world.pop
-        disease!(a, model.world, pars, iefpars)
+        disease!(a, model.world, pars)
     end
 
     # avoid order effects on interaction
@@ -71,7 +72,7 @@ function step!(model, pars, iefpars)
         if a.immune.status == IStatus.infected
             for c in a.contacts
                 if c.immune.status != IStatus.infected
-                    encounter!(a, c, model.world.ief, pars, iefpars)
+                    encounter!(a, c, model.world.ief, 0.0, pars)
                 end
             end
         end

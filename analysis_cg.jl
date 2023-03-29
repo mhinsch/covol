@@ -5,7 +5,7 @@ const MVA = MeanVarAcc{Float64}
 # maximum, minimum
 const MMA = MaxMinAcc{Float64}
 
-@observe Data world pars pars_ief begin
+@observe Data world pars t begin
     @for person in world.pop begin
         @stat("n_inf", CountAcc) <| (person.immune.status == IStatus.infected)
         @stat("n_rec", CountAcc) <| (person.immune.status == IStatus.recovered)

@@ -9,4 +9,3 @@ end
 
 Immune() = Immune(IStatus.naive)
 
-
