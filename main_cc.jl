@@ -15,8 +15,8 @@ end
 
 
 function run(model, pars, log_freq, log_file = nothing)
+    data = observe(Data, model.world, 0)
     for i in 1:pars.n_steps
-        data = observe(Data, model.world, i)
         step!(model, pars)
         if model.time % pars.obs_freq == 0
             data = observe(Data, model.world, i)
