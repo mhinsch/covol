@@ -89,7 +89,6 @@ function main(par_overrides...)
                     add_value!(graph_ief_mx, data.ief.max)
                 end
             end
-            h = rand(model.world.map)
             ft = RL.GetFrameTime()
             println(data.n_inf.n, " ", data.n_inf_houses.n, " ", 1.0/ft)
             if model.time >= 23 * 60 - pars.timestep
