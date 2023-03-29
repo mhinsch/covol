@@ -11,7 +11,7 @@ mutable struct Agent
     contacts :: Vector{Agent}
 end
 
-Agent() = Agent(Virus(), Immune(), 1.0, [])
+Agent() = Agent(Virus(), Immune(), 0.0, [])
 
 infectivity(agent) = agent.virus.e_ief
 infectious(agent) = agent.immune.status == IStatus.infected
@@ -72,7 +72,9 @@ function step!(model, pars)
         if a.immune.status == IStatus.infected
             for c in a.contacts
                 if c.immune.status != IStatus.infected
-                    encounter!(a, c, model.world.ief, 0.0, pars)
+                    if encounter!(a, c, model.world.ief, 0.0, pars)
+                        c.immune.status = IStatus.infected
+                    end
                 end
             end
         end
