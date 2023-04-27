@@ -12,6 +12,9 @@ using Parameters
     "length of a time step in minutes"
     timestep        :: Int              = 15
     
+    "read population from file"
+    pop_file		:: String			= ""
+    
     "number of houses in x direction"
     x_size          :: Int              = 100
     "number of houses in y direction"

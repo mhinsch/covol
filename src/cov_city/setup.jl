@@ -9,30 +9,42 @@ function get_rnd_empty_house(houses)
         end
     end
 end
+
+
+function create_square_map(pars)
+    map = [ Place(PlaceT.nowhere, Pos(x, y)) for x in 1:pars.x_size, y in 1:pars.y_size ]
+end
+
+
+n_houses(pars) = pars.x_size * pars.y_size - 
+    pars.n_hospitals - pars.n_smarkets - pars.n_leisure
+        
+space_per_person(pars) = 1/pars.ratio_pop_dwellings + pars.prop_children * 1/pars.class_size +
+    (1-pars.prop_children) * 1/pars.workplace_size
+    
+pop_size(pars) = floor(Int, n_houses(pars)/space_per_person(pars) * 0.95)
+    
+n_children(pars) = floor(Int, pop_size(pars) * pars.prop_children)
+
+n_schools(pars) = floor(Int, n_children(pars) / pars.class_size * 1.05)
+
+n_commercial(pars) = floor(Int, (pop_size(pars) - n_children(pars)) / pars.workplace_size)
+
+n_residential(pars) = n_houses(pars) - n_schools(pars) - pars.n_hospitals - pars.n_smarkets -
+    n_commercial(pars) - pars.n_leisure
     
 
 function create_world(pars)
-    map = [ Place(PlaceT.nowhere, Pos(x, y)) for x in 1:pars.x_size, y in 1:pars.y_size ]
-
+    map = create_square_map(pars)
+    
+    # houses by type
     houses = Vector{Vector{Place}}()
 
     for i in 1:n_instances(PlaceT.T)-1
         push!(houses, Vector{Place}())
     end
     
-    n_houses = pars.x_size * pars.y_size - 
-        pars.n_hospitals - pars.n_smarkets - pars.n_leisure
-    
-    space_per_person = 1/pars.ratio_pop_dwellings + pars.prop_children * 1/pars.class_size +
-        (1-pars.prop_children) * 1/pars.workplace_size
-    
-    pop_size = floor(Int, n_houses/space_per_person * 0.95)
-    
-    n_children = floor(pop_size * pars.prop_children)
-    n_schools = floor(Int, n_children / pars.class_size * 1.05)
-    n_commercial = floor(Int, (pop_size - n_children) / pars.workplace_size)
-    
-    for i in 1:n_schools
+    for i in 1:n_schools(pars)
         h = get_rnd_empty_house(map)
         h.type = PlaceT.school
         push!(houses[Int(PlaceT.school)], h)
@@ -50,7 +62,7 @@ function create_world(pars)
         push!(houses[Int(PlaceT.supermarket)], h)
     end
 
-    for i in 1:n_commercial
+    for i in 1:n_commercial(pars)
         h = get_rnd_empty_house(map)
         h.type = PlaceT.work
         push!(houses[Int(PlaceT.work)], h)
@@ -72,11 +84,29 @@ function create_world(pars)
 
     t_cache = [ Transport[] for x in 1:pars.x_size, y in 1:pars.y_size ]
 
-    World(map, houses, [], [], t_cache, [], IEF([], []), 0.0, false, false, false), pop_size
+    World(map, houses, [], [], t_cache, [], IEF([], []), 0.0, false, false, false) 
 end
 
 
-# This is super inefficient ATM as there is substantial overlap between
+function load_pop_from_file(io)
+    #skip header 
+    readline(io)
+    
+    houses = Dict{Int128, Vector{Float64}}()
+    
+    for line in eachline(io)
+        fs = split(line)
+        id = parse(Int128, fs[1])
+        age = parse(Rational{Int}, fs[2]) |> Float64
+        h = get!(()->Vector{Int128}(), houses, id)
+        push!(h, age)
+    end
+    
+    values(houses) |> collect
+end
+        
+
+# This is superpop_size(pars)inefficient ATM as there is substantial overlap between
 # subsequent points (see setup_transport).
 # However, this is called only once during setup, so we can probably live with that.
 function cache_transport!(tp, cache, atx, aty, pars)
@@ -173,7 +203,31 @@ function setup_ief!(world, pars)
     world.ief = IEFModel.setup_ief(pars)
 end
 
-function create_agents!(world, n_agents, pars)
+function setup_agent!(home, is_child, world, pars)
+    work = is_child ?
+        rand(world.houses[Int(PlaceT.school)]) :
+        rand(world.houses[Int(PlaceT.work)])
+    agent = Agent(home, work, rand(world.schedules))
+    add_agent!(home, agent)
+    
+    agent.risk = rand() < pars.p_at_risk ? 
+        rand() * (pars.risk_range[2]-pars.risk_range[1]) + pars.risk_range[1] :
+        0.0
+        
+    agent.recklessness = rand() * (pars.reck_range[2]-pars.reck_range[1]) + pars.reck_range[1]
+    agent.obstinacy = rand() * (pars.obst_range[2]-pars.obst_range[1]) + pars.obst_range[1]
+    
+    for i in 1:pars.n_leisure_pp
+        push!(agent.fun, rand(world.houses[Int(PlaceT.leisure)]))
+    end
+    
+    agent.virus = NoVirus
+    
+    push!(world.pop, agent)
+end
+
+
+function create_synth_agents!(world, n_agents, pars)
     # simplistic home, work
     # TODO family size distribution
     # TODO non-residential homes (e.g. care homes)
@@ -184,32 +238,29 @@ function create_agents!(world, n_agents, pars)
     println("creating $n_agents agents")
     for i in 1:n_agents
         home = rand(world.houses[Int(PlaceT.residential)])
-        work = rand() < pars.prop_children ?
-            rand(world.houses[Int(PlaceT.school)]) :
-            rand(world.houses[Int(PlaceT.work)])
-        agent = Agent(home, work, rand(world.schedules))
-        add_agent!(home, agent)
-        
-        agent.risk = rand() < pars.p_at_risk ? 
-            rand() * (pars.risk_range[2]-pars.risk_range[1]) + pars.risk_range[1] :
-            0.0
-            
-        agent.recklessness = rand() * (pars.reck_range[2]-pars.reck_range[1]) + pars.reck_range[1]
-        agent.obstinacy = rand() * (pars.obst_range[2]-pars.obst_range[1]) + pars.obst_range[1]
-        
-        for i in 1:pars.n_leisure_pp
-            push!(agent.fun, rand(world.houses[Int(PlaceT.leisure)]))
-        end
-        
-        agent.virus = NoVirus
-        
-        push!(world.pop, agent)
+        setup_agent!(home, rand() < pars.prop_children, world, pars)
     end
     
     
     # TODO shops 
 end
 
+
+function setup_pre_pop!(world, houses, pars)
+    res_houses = world.houses[Int(PlaceT.residential)]
+    rnd_indices = 1:length(res_houses) |> collect |> shuffle
+    
+    n_households = min(length(houses), length(res_houses))
+    
+    for i in 1:n_households
+        agents = houses[i]
+        house = res_houses[rnd_indices[i]]
+        for a in agents
+            setup_agent!(house, a<18, world, pars)
+        end
+    end
+end
+    
 
 function setup_social!(world, pars)
     # simplistic family setup
@@ -267,11 +318,17 @@ end
 
 
 function setup_model(pars)
-    world, n_agents = create_world(pars)
+    world = create_world(pars)
     setup_transport!(world, pars)
     setup_flexible_schedules!(world, pars)
     setup_ief!(world, pars)
-    create_agents!(world, n_agents, pars)
+    if pars.pop_file == ""
+        create_synth_agents!(world, pop_size(pars), pars)
+    else
+        pf = open(pars.pop_file, "r")
+        houses = load_pop_from_file(pf)
+        setup_pre_pop!(world, houses, pars)
+    end
     setup_social!(world, pars)
     initial_infected!(world, pars)
     Model(world, 0, 1, 0)

@@ -19,6 +19,13 @@ distance(x1, y1, x2, y2) = sqrt(sq_dist(x1, y1, x2, y2))
 
 n_instances(T) = length(instances(T))
 
+# For some reason Julia can *write* Rational, but not read it...
+"parse Rational from an AbstractString"
+function Base.parse(::Type{Rational{T}}, s::AbstractString) where {T}
+    nums = split(s, "//")
+    Rational{T}(parse(T, nums[1]), parse(T, nums[2]))
+end
+
 # based on this code:
 # https://stackoverflow.com/questions/40273880/draw-a-line-between-two-pixels-on-a-grayscale-image-in-julia
 function bresenham(f :: Function, x1::Int, y1::Int, x2::Int, y2::Int)
