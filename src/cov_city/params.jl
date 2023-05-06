@@ -14,6 +14,7 @@ using Parameters
     
     "read population from file"
     pop_file		:: String			= ""
+    houses_file		:: String			= ""
     
     "number of houses in x direction"
     x_size          :: Int              = 100

@@ -148,7 +148,7 @@ function covid_experience!(agent, world, pars)
         delta += (1.0 - agent.cov_experience) * pars.exp_self_weight
     end
     
-    ps = count(sick, agent.family) / length(agent.family)
+    ps = length(agent.family) == 0 ? 0.0 : count(sick, agent.family) / length(agent.family)
     delta += (1.0 - agent.cov_experience) * pars.exp_family_weight * ps
 
     ps = count(sick, agent.friends) / length(agent.friends)

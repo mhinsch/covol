@@ -92,17 +92,36 @@ function load_pop_from_file(io)
     #skip header 
     readline(io)
     
-    houses = Dict{Int128, Vector{Float64}}()
-    
+    # house id => agents ids
+    houses = Dict{Int128, Vector{Int128}}()
+    # agent id => (age, family ids)
+    agents = Dict{Int128, Tuple{Float64, Vector{Int128}}}()
+   
     for line in eachline(io)
         fs = split(line)
-        id = parse(Int128, fs[1])
-        age = parse(Rational{Int}, fs[2]) |> Float64
-        h = get!(()->Vector{Int128}(), houses, id)
-        push!(h, age)
+        pid = parse(Int128, fs[1])
+        hid = parse(Int128, fs[2])
+        age = parse(Rational{Int}, fs[3]) |> Float64
+        father = parse(Int128, fs[6])
+        mother = parse(Int128, fs[7])
+        partner = parse(Int128, fs[8])
+        children = split(replace(fs[10], "("=>"", ")"=>""), ",")
+        family = isempty(children) || children[1]=="" ? Int128[] : parse.(Int128, children)
+        if father != 0
+            push!(family, father)
+        end
+        if mother != 0
+            push!(family, mother)
+        end
+        if partner != 0
+            push!(family, partner)
+        end
+        agents[pid] = age, family
+        h = get!(()->Vector{Int128}(), houses, hid)
+        push!(h, pid)
     end
     
-    values(houses) |> collect
+    agents, values(houses) |> collect 
 end
         
 
@@ -203,8 +222,8 @@ function setup_ief!(world, pars)
     world.ief = IEFModel.setup_ief(pars)
 end
 
-function setup_agent!(home, is_child, world, pars)
-    work = is_child ?
+function setup_agent!(home, age, world, pars)
+    work = age<18 ?
         rand(world.houses[Int(PlaceT.school)]) :
         rand(world.houses[Int(PlaceT.work)])
     agent = Agent(home, work, rand(world.schedules))
@@ -224,6 +243,8 @@ function setup_agent!(home, is_child, world, pars)
     agent.virus = NoVirus
     
     push!(world.pop, agent)
+    
+    agent
 end
 
 
@@ -240,36 +261,60 @@ function create_synth_agents!(world, n_agents, pars)
         home = rand(world.houses[Int(PlaceT.residential)])
         setup_agent!(home, rand() < pars.prop_children, world, pars)
     end
-    
-    
     # TODO shops 
 end
 
 
-function setup_pre_pop!(world, houses, pars)
+function setup_pre_pop!(world, agents, houses, pars)
     res_houses = world.houses[Int(PlaceT.residential)]
     rnd_indices = 1:length(res_houses) |> collect |> shuffle
     
     n_households = min(length(houses), length(res_houses))
     
+    agids_by_obj = Dict{Agent, Int128}()
+    ags_by_id = Dict{Int128, Agent}()
+    # load agents by household, so that we can simply stop when
+    # all houses are full
     for i in 1:n_households
-        agents = houses[i]
+        residents = houses[i]
         house = res_houses[rnd_indices[i]]
-        for a in agents
-            setup_agent!(house, a<18, world, pars)
+        for id in residents
+            age = agents[id][1]
+            agent = setup_agent!(house, age, world, pars)
+            agids_by_obj[agent] = id
+            ags_by_id[id] = agent
+        end
+    end
+    
+    # now that all agents exist we can assign families
+    for agent in world.pop
+        id = agids_by_obj[agent]
+        family = agents[id][2]
+        for fid in family
+            fagent = get(ags_by_id, fid, nothing)
+            # we might have run out of houses, so not all agents might have been loaded
+            if fagent == nothing
+                continue
+            end
+            
+            push!(agent.family, fagent)
+            print(".")
         end
     end
 end
-    
 
-function setup_social!(world, pars)
+
+function setup_family_in_house!(world, pars)
     # simplistic family setup
     for home in world.houses[Int(PlaceT.residential)]
         for a1 in home.present, a2 in home.present
             push!(a1.family, a2)
         end
     end
-    
+end
+
+
+function setup_rand_friends!(world, pars)
     n_a = length(world.pop)
     n_conn = rand(Binomial(n_a*(n_a-1)÷2, pars.mean_n_friends/n_a))
    
@@ -290,7 +335,6 @@ end
 
 
 function initial_infected!(world, pars)
-        
     if pars.mixed_ini_inf
         for i in 1:pars.n_infected
             while true
@@ -324,12 +368,13 @@ function setup_model(pars)
     setup_ief!(world, pars)
     if pars.pop_file == ""
         create_synth_agents!(world, pop_size(pars), pars)
+        setup_family_in_house!(world, pars)
     else
         pf = open(pars.pop_file, "r")
-        houses = load_pop_from_file(pf)
-        setup_pre_pop!(world, houses, pars)
+        agents, houses = load_pop_from_file(pf)
+        setup_pre_pop!(world, agents, houses, pars)
     end
-    setup_social!(world, pars)
+    setup_rand_friends!(world, pars)
     initial_infected!(world, pars)
     Model(world, 0, 1, 0)
 end
