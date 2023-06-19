@@ -15,7 +15,7 @@ function n_infected_transport(t)
     n
 end
 
-@observe Data world t begin
+@observe Data world t pars begin
     @record "time" Int t
     
     @for house in world.map begin
@@ -43,6 +43,10 @@ end
     @for inf in Iterators.filter(p->infectious(p), world.pop) begin
         @stat("ief", MVA, MMA) <| inf.virus.ief_0
         @stat("v_age", MVA, MMA) <| Float64(inf.virus.age)
+    end
+    
+    @for d in hamming_dists(world.pop, 1000) begin
+        @stat("hamming", MVA, HistAcc(0.0, 0.01, 1.0, count_above_max=true)) <| d/pars.max_antigen
     end
 end
 

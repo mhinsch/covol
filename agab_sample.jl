@@ -7,6 +7,7 @@ function gene_dist(ga, gb)
     d/length(ga)
 end
 
+"Sort genomes by frequency and calculate distance to most frequent one."
 function sample_virus_genes(pop, compare = nothing)
     cdict = Dict{typeof(pop[1].virus.antigens), Int}() 
     for a in pop
@@ -33,4 +34,23 @@ function sample_virus_genes(pop, compare = nothing)
     
     genes, dist1, dist2
 end
-        
+
+
+function hamming_dists(pop, n)
+    inf_pop = [a for a in pop if infected(a)]
+    
+    dists = Float64[]
+    
+    if length(inf_pop) <= 1
+        return dists
+    end
+    
+    for i in 1:n
+        ag_a = rand(inf_pop)
+        while (ag_b = rand(inf_pop)) == ag_a end
+            
+        push!(dists, gene_dist(ag_a.virus.antigens, ag_b.virus.antigens))
+    end
+    
+    dists
+end
