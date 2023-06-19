@@ -22,7 +22,7 @@ using Printf
 using Raylib
 const RL = Raylib
 
-export Graph, add_value!, draw_graph, set_data!
+export Graph, add_value!, draw_graph, set_data!, Graph3D, draw_graph3D
 
 ### super simplistic graph implementation
 
@@ -126,4 +126,27 @@ function draw_graph(x_0, y_0, width, height, graphs;
 end
 
 
+mutable struct Graph3D{T}
+    data :: Vector{Vector{T}}
 end
+
+col(v, mi, ma) = ma>mi ? (v-mi)/(ma-mi) : 0
+
+function draw_graph3D(x_0, y_0, graph, scale)
+    if isempty(graph.data)
+        return
+    end
+        
+    for (y, line) in enumerate(graph.data)
+        mi = minimum(line)
+        ma = maximum(line)
+        for (x, v) in enumerate(line)
+            c = col(v, mi, ma)
+            RL.DrawRectangle(x_0 + (x-1)*scale[1], y_0 + (y-1)*scale[2], scale[1], scale[2], 
+                RL.ColorFromNormalized(RL.rayvector(c, (c<0.5 ? c*2 : 2-c*2), 0.0, 1.0)))
+        end
+    end
+end
+
+end
+
