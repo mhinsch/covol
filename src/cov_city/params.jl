@@ -33,7 +33,7 @@ using Parameters
     "number of supermarkets"
     n_smarkets      :: Int              = 50
     "number of leisure buildings"
-    n_leisure       :: Int              = 50
+    prop_leisure       :: Float64       = 0.005
    
     "mean number of friends per agent" 
     mean_n_friends		:: Float64		= 15

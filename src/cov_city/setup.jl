@@ -16,8 +16,8 @@ function create_square_map(pars)
 end
 
 
-n_houses(pars) = pars.x_size * pars.y_size - 
-    pars.n_hospitals - pars.n_smarkets - pars.n_leisure
+n_houses(pars) = pars.x_size * pars.y_size * (1.0 - pars.prop_leisure) - 
+    pars.n_hospitals - pars.n_smarkets 
         
 space_per_person(pars) = 1/pars.ratio_pop_dwellings + pars.prop_children * 1/pars.class_size +
     (1-pars.prop_children) * 1/pars.workplace_size
@@ -30,8 +30,10 @@ n_schools(pars) = floor(Int, n_children(pars) / pars.class_size * 1.05)
 
 n_commercial(pars) = floor(Int, (pop_size(pars) - n_children(pars)) / pars.workplace_size)
 
+n_leisure(pars) = floor(Int, n_houses(pars) * pars.prop_leisure)
+
 n_residential(pars) = n_houses(pars) - n_schools(pars) - pars.n_hospitals - pars.n_smarkets -
-    n_commercial(pars) - pars.n_leisure
+    n_commercial(pars) - n_leisure(pars)
     
 
 function create_world(pars)
@@ -68,7 +70,7 @@ function create_world(pars)
         push!(houses[Int(PlaceT.work)], h)
     end
 
-    for i in 1:pars.n_leisure
+    for i in 1:n_leisure(pars)
         h = get_rnd_empty_house(map)
         h.type = PlaceT.leisure
         push!(houses[Int(PlaceT.leisure)], h)
@@ -298,7 +300,6 @@ function setup_pre_pop!(world, agents, houses, pars)
             end
             
             push!(agent.family, fagent)
-            print(".")
         end
     end
 end
