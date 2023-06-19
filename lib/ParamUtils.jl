@@ -135,9 +135,14 @@ function par_from_dict(dict, par, name; require_all_fields = true)
 
     ptype = typeof(par)
     for f in fieldnames(ptype)
-        if require_all_fields && !haskey(pdict, f)
-            # all fields have to be set (or none)
-            error("Field $f required in parameter $(name)!")
+        if !haskey(pdict, f)
+            if require_all_fields
+                # all fields have to be set (or none)
+                error("Field $f required in parameter $(name)!")
+            else
+                # ignore
+                continue
+            end
         end
 
         # use setValue, so that e.g. Rational can be converted from String

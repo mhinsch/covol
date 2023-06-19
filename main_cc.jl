@@ -1,5 +1,6 @@
 include("main_util.jl")
 include("cov_city.jl")
+include("agab_sample.jl")
 include("analysis_cc.jl")
 
 using Random
@@ -15,11 +16,11 @@ end
 
 
 function run(model, pars, log_freq, log_file = nothing)
-    data = observe(Data, model.world, 0)
+    data = observe(Data, model.world, 0, pars)
     for i in 1:pars.n_steps
         step!(model, pars)
         if model.time % pars.obs_freq == 0
-            data = observe(Data, model.world, i)
+            data = observe(Data, model.world, i, pars)
             ticker(model, data)
         end
         if model.time % log_freq == 0
@@ -31,9 +32,11 @@ function run(model, pars, log_freq, log_file = nothing)
 end
 
 
-const (pars,), args = load_parameters(ARGS, (AllParams,), 
+const allpars, args = load_parameters(ARGS, AllParams, cmdl = ( 
     ["--log-freq"],
-    Dict(:help => "set time steps between log calls", :default => 23*60, :arg_type => Int))
+    Dict(:help => "set time steps between log calls", :default => 23*60, :arg_type => Int)))
+    
+const pars = allpars[1]
 
 Random.seed!(pars.seed)
 
