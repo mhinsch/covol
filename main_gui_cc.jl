@@ -54,7 +54,9 @@ function main(par_overrides...)
     graph_sick = Graph{Float64}(RL.BLUE)
     graph_inf = Graph{Float64}(RL.RED)
     graph_rec = Graph{Float64}(RL.DARKGREEN)
-    graph_n_imm = Graph{Float64}(RL.DARKGREEN)
+    #graph_n_imm = Graph{Float64}(RL.DARKGREEN)
+    graph_hamm = Graph{Float64}(RL.DARKGREEN)
+    gh3d = Graph3D{Float64}([])
     #graph_n_imm_max = Graph{Float64}(RL.RED)
     graph_ief_mn = Graph{Float64}(RL.BLACK)
     graph_ief_mx = Graph{Float64}(RL.WHITE)
@@ -66,7 +68,7 @@ function main(par_overrides...)
     ancestor = model.world.pop[a_idx].virus.antigens
     pause = false
     steps_per_frame = 1
-    data = observe(Data, model.world, 0)
+    data = observe(Data, model.world, 0, pars)
 #    time = Rational(simPars.startTime)
     while !RL.WindowShouldClose()
 
@@ -74,7 +76,7 @@ function main(par_overrides...)
             for s in 1:steps_per_frame
                 step!(model, pars)
                 if model.time % pars.obs_freq == 0
-                    data = observe(Data, model.world, model.time)
+                    data = observe(Data, model.world, model.time, pars)
                     #log_results(logfile, data)
                     # add values to graph objects
                     add_value!(graph_mean_exp, data.exp.mean)
@@ -83,7 +85,10 @@ function main(par_overrides...)
                     add_value!(graph_sick, data.n_sick.n/length(model.world.pop))
                     add_value!(graph_inf, data.n_inf.n/length(model.world.pop))
                     add_value!(graph_rec, data.n_rec.n/length(model.world.pop))
-                    set_data!(graph_n_imm, data.n_imm.bins, minm=0.0)
+                    #set_data!(graph_n_imm, data.n_imm.bins, minm=0.0)
+                    #add_value!(graph_hamm, data.hamming.mean)
+                    set_data!(graph_hamm, data.hamming.bins, minm=0.0)
+                    push!(gh3d.data, data.hamming.bins)
                     #add_value!(graph_n_imm_max, data.n_imm.max)
                     add_value!(graph_ief_mn, data.ief.mean)
                     add_value!(graph_ief_mx, data.ief.max)
@@ -111,12 +116,14 @@ function main(par_overrides...)
 
         RL.ClearBackground(RL.LIGHTGRAY)
         
-        RL.BeginMode2D(camera)
+        #RL.BeginMode2D(camera)
         
-        drawModel(model, (x=0, y=0), (x=5, y=5))
+        #drawModel(model, (x=0, y=0), (x=5, y=5))
 
-        RL.EndMode2D()
-
+        #RL.EndMode2D()
+        
+        draw_graph3D(0, 0, gh3d, (5, 1))
+        
         # draw graphs
         draw_graph(floor(Int, screenWidth*1/2), 0, 
                    floor(Int, screenWidth/4), floor(Int, screenHeight/2) - 30, 
@@ -134,9 +141,9 @@ function main(par_overrides...)
             
         draw_graph(floor(Int, screenWidth*1/2), floor(Int, screenHeight/2), 
                    floor(Int, screenWidth/4), floor(Int, screenHeight/2) - 30, 
-            [graph_n_imm], #, graph_n_imm_max],
+            [graph_hamm], #[graph_n_imm], #, graph_n_imm_max],
             single_scale = true, 
-            labels = ["n imm"], #, "max n imm"],
+            labels = ["hamming"], #, "max n imm"],
             fontsize = floor(Int, 15 * scale))
         
         draw_graph(floor(Int, screenWidth*3/4), floor(Int, screenHeight/2), 
