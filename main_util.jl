@@ -15,19 +15,22 @@ add_to_load_path!(joinpath(@__DIR__, "lib"))
 using ParamUtils
 
 
-function load_parameters(argv, partypes, cmdl...; override = nothing)
+function load_parameters(argv, partypes...; cmdl = nothing, override = nothing)
 	arg_settings = ArgParseSettings("run simulation", autofix_names=true)
 
 	@add_arg_table! arg_settings begin
 		"--par-file", "-p"
             help = "parameter file"
             default = ""
+        "--patch"
+            help = "allow incomplete parameter files"
+            action = :store_true
         "--par-out-file", "-P"
 			help = "file name for parameter output"
 			default = "parameters.run.yaml"
 	end
 
-    if ! isempty(cmdl)
+    if cmdl != nothing
         add_arg_table!(arg_settings, cmdl...)
     end
 
@@ -43,7 +46,7 @@ function load_parameters(argv, partypes, cmdl...; override = nothing)
 
     # read parameters from file if provided or set to default
     # returns a tuple!
-    par_objects = load_parameters_from_file(args[:par_file], partypes...)
+    par_objects = load_parameters_from_file(args[:par_file], args[:patch], partypes...)
 
     # override values that were provided as arguments
     if override != nothing
@@ -66,11 +69,11 @@ function save_parameters_to_file(fname, pars...)
 end
 
 
-function load_parameters_from_file(fname, partypes...)
+function load_parameters_from_file(fname, allow_incomplete, partypes...)
     DT = Dict{Symbol, Any}
     yaml = fname == "" ? DT() : YAML.load_file(fname, dicttype=DT)
 
-    pars_from_dict(yaml, partypes...)
+    pars_from_dict(yaml, partypes..., require_all_fields = !allow_incomplete)
 end
 
 
