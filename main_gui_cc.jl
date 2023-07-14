@@ -24,9 +24,9 @@ function main(par_overrides...)
     end
 
     # need to do that first, otherwise it blocks the GUI
-    (pars,), args = load_parameters(args, (AllParams,),
+    (pars,), args = load_parameters(args, AllParams, cmdl = (
         ["--gui-scale"], 
-        Dict(:help => "set gui scale", :default => 1.0, :arg_type => Float64))
+        Dict(:help => "set gui scale", :default => 1.0, :arg_type => Float64)))
 
     Random.seed!(pars.seed)
 
