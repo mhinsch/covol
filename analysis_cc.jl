@@ -8,19 +8,21 @@ const MMA = MaxMinAcc{Float64}
 function n_infected_transport(t)
     n = 0
     for car in t.cars, p in car.present
-        if p.immune.status == IStatus.infected
+        if infected(p)
             n += 1
         end
     end
     n
 end
 
-@observe Data world begin
+@observe Data world t pars begin
+    @record "time" Int t
+    
     @for house in world.map begin
         # format:
         # @stat(name, accumulators...) <| expression
         @stat("n_inf_houses", CountAcc) <| 
-            (findfirst(p->p.immune.status == IStatus.infected, house.present) != nothing)
+            (findfirst(infected, house.present) != nothing)
     end
 
     @for transport in world.transports begin
@@ -29,12 +31,22 @@ end
     end
 
     @for person in world.pop begin
-        @stat("n_inf", CountAcc) <| (person.immune.status == IStatus.infected)
-        @stat("n_rec", CountAcc) <| (person.immune.status == IStatus.recovered)
+        @stat("n_inf", CountAcc) <| (infected(person))
+        @stat("n_sick", CountAcc) <| (sick(person))
+        @stat("n_rec", CountAcc) <| (length(person.immune_system) > 0)
+        @stat("n_imm", MVA, MMA, HistAcc(0.0, 1.0)) <| Float64(length(person.immune_system))
+        @stat("exp", MVA, MMA) <| person.cov_experience
+# TODO activity of most active immunity
+#        @if infected(person) @stat("imm", MVA, MMA) <| 
     end
 
     @for inf in Iterators.filter(p->infectious(p), world.pop) begin
         @stat("ief", MVA, MMA) <| inf.virus.ief_0
+        @stat("v_age", MVA, MMA) <| Float64(inf.virus.age)
+    end
+    
+    @for d in hamming_dists(world.pop, 1000) begin
+        @stat("hamming", MVA, HistAcc(0.0, 0.01, 1.0, count_above_max=true)) <| d/pars.max_antigen
     end
 end
 

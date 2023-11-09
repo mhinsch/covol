@@ -1,8 +1,7 @@
 function remove_unsorted!(cont, obj)
     for (i, el) in enumerate(cont)
         if el == obj
-            cont[i] = cont[end]
-            pop!(cont)
+            remove_unsorted_at!(cont, i)
             return
         end
     end
@@ -10,11 +9,22 @@ function remove_unsorted!(cont, obj)
     error("obj not found!")
 end
 
+function remove_unsorted_at!(cont, idx)
+    cont[idx] = cont[end]
+    pop!(cont)
+end
 
 sq_dist(x1, y1, x2, y2) = (x2-x1)^2 + (y2-y1)^2
 distance(x1, y1, x2, y2) = sqrt(sq_dist(x1, y1, x2, y2))
 
 n_instances(T) = length(instances(T))
+
+# For some reason Julia can *write* Rational, but not read it...
+"parse Rational from an AbstractString"
+function Base.parse(::Type{Rational{T}}, s::AbstractString) where {T}
+    nums = split(s, "//")
+    Rational{T}(parse(T, nums[1]), parse(T, nums[2]))
+end
 
 # based on this code:
 # https://stackoverflow.com/questions/40273880/draw-a-line-between-two-pixels-on-a-grayscale-image-in-julia

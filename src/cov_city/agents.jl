@@ -1,6 +1,6 @@
 using EnumX
-using Parameters
 using Distributions
+using Base: @kwdef
 
 using DailySchedule
 using IEFModel
@@ -16,7 +16,10 @@ mutable struct PlaceG{AG}
     type :: PlaceT.T
     pos :: Pos
     present :: Vector{AG}
+    n_infections :: Int
 end
+
+PlaceG{AG}(t, p) where {AG} = PlaceG{AG}(t, p, [], 0)
 
 isnowhere(place) = place.type == PlaceT.nowhere
 
@@ -24,61 +27,56 @@ add_agent!(place, agent) = push!(place.present, agent)
 remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
 
 
-@enumx Activity home=1 working leisure shopping hospital travel none
+@enumx Activity home=1 prepare_work working prepare_leisure leisure travel stay_home none
 
-@with_kw mutable struct Agent
-    # admin, possibly subsume in others
-    activity :: Activity.T
-    loc :: PlaceG{Agent}
-    dest :: PlaceG{Agent}
-    plan :: Activity.T
-    "socio economic status"
-    soc_status :: Int
-    age :: Float64
+@kwdef mutable struct Agent
+    home 		:: PlaceG{Agent}
+    work 		:: PlaceG{Agent}
+    family 		:: Vector{Agent}	= []
+    friends 	:: Vector{Agent}	= []
+#    shops 		:: Vector{PlaceG{Agent}} = []
+    fun 		:: Vector{PlaceG{Agent}} = []
+    
+    schedule 	:: Schedule
+    activity	:: Activity.T		= Activity.home
+    loc 		:: PlaceG{Agent}	= home
+    dest 		:: PlaceG{Agent}	= home
+    plan 		:: Activity.T		= Activity.home
+    t_next_act	:: Int				= 0
+#    "socio economic status"
+#    soc_status 	:: Int				= 0
+#    age :: Float64
 
     "current health"
-    health :: Float64
+    health 		:: Float64			= 1.0
     "immune status + history"
-    immune :: Immune
+    immune_system:: ImmuneSystem	= ImmuneSystem()
     "virus population"
-    virus :: Virus
+    virus 		:: AGIEFVirus		= AGIEFVirus()
+    immune_strength :: Float64		= 1.0
     # might not be needed / part of immune status
     "prior physiological risk"
-    risk :: Float64
-
+    risk 		:: Float64			= 0.0
+    
+    "tendency to ignore covid experience"
+    recklessness :: Float64			= 0.0
     "tendency to refuse official advice"
-    obstinacy :: Float64
+    obstinacy 	:: Float64			= 0.0
     "seen or experienced Covid"
-    cov_experience :: Float64
-    "need to be present at job"
-    job_presence :: Float64
-    "ability to risk job"
-    job_independence :: Float64
-
-    family :: Vector{Agent}
-    friends :: Vector{Agent}
-    home :: PlaceG{Agent}
-    work :: PlaceG{Agent}
-    shops :: Vector{PlaceG{Agent}}
-    fun :: Vector{PlaceG{Agent}}
-
-    schedule :: Schedule
+    cov_experience :: Float64		= 0.0
+#    "need to be present at job"
+#    job_presence :: Float64
+#    "ability to risk job"
+#    job_independence :: Float64
 end
 
 
-Agent(h, w, schedule) = Agent(Activity.home, h, h, Activity.home, 0, 30, 
-    1.0, Immune(IStatus.naive), Virus(), rand(), 
-    rand(), 0.0, 0.0, 0.5, 
-    [], [], h, w, [], [], 
-    schedule)
+Agent(home, work, schedule) = Agent(;home, work, schedule)
 
-infectivity(agent) = agent.virus.e_ief
-infectious(agent) = agent.immune.status == IStatus.infected
-susceptible(agent) = !infectious(agent)
 
 const Place = PlaceG{Agent}
 
-const Nowhere = Place(PlaceT.nowhere, Pos(-1, -1), [])
+const Nowhere = Place(PlaceT.nowhere, Pos(-1, -1), [], 0)
 
 function change_loc!(agent, new_loc)
     if agent.loc != Nowhere
@@ -111,8 +109,13 @@ mutable struct World
     pop :: Vector{Agent}
     transports :: Vector{Transport}
     t_cache :: Matrix{Vector{Transport}}
-    schedules :: Vector{Schedule}
+    schedules :: Vector{Schedule{FlexibleDaySched}}
     ief :: IEF
+    
+    alarm :: Float64
+    isolation :: Bool
+    require_masks :: Bool
+    lockdown :: Bool
 end
 
 

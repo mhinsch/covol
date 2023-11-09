@@ -13,11 +13,11 @@ using Parameters
     "sigma of normal dist describing fitness effect of ief mutation"
     ief_mut_sigma   :: Float64          = 0.1
     "number of reproduction cycles to pre-compute ief for"
-    ief_pre_n_steps :: Int              = floor(Int, 14 * 24 * 4 / 40)
+    ief_pre_n_steps :: Int              = floor(Int, 14 * 24 * 60 / (10 * 60))
     "number of samples to base fitness calculation on"
     ief_pre_n_samples :: Int            = 10000
     "number of bins in fitness lookup table"
     ief_pre_n_bins  :: Int              = 100
     "time steps per virus reproduction cycle"
-    t_repr_cycle    :: Int              = 40
+    t_repr_cycle    :: Int              = 10 * 60 / 15
 end
