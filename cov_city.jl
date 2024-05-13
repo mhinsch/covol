@@ -2,10 +2,10 @@ using CompositeStructs
 
 include("main_util.jl")
 
-add_to_load_path!(joinpath(@__DIR__, "src/simple_ief"))
+add_to_load_path!(joinpath(@__DIR__, "src/basic_ief"))
 
 include("src/util.jl")
-include("src/infection.jl")
+include("src/ief_infection.jl")
 include("src/agab/antigen_antibody.jl")
 include("src/agab/immune.jl")
 include("src/agab/params.jl")
