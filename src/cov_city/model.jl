@@ -160,7 +160,7 @@ end
 
 # done globally for now
 # TODO take into account viral load
-function infection!(place, world, pars)
+function do_infections!(place, world, pars)
     inf = @static_var Agent[]
     susc = @static_var Agent[]
     empty!(inf)
@@ -169,7 +169,7 @@ function infection!(place, world, pars)
     for a in place.present
         if infectious(a)
             push!(inf, a)
-        elseif susceptible(a)
+        elseif update_disease!(a)
             push!(susc, a)
         end
     end

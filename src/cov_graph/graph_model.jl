@@ -62,7 +62,7 @@ end
 
 function step!(model, pars)
     for a in model.world.pop
-        disease!(a, model.world, pars)
+        update_disease!(a, model.world, pars)
     end
 
     # avoid order effects on interaction

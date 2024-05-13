@@ -20,18 +20,18 @@ function step!(model, pars)
     #println("disease")
     #if model.time % pars.dt_disease == 0
         for agent in world.pop
-            disease!(agent, world, pars)
+            update_disease!(agent, world, pars)
         end
     #end
 
     #println("infection")
     for house in world.map
-        infection!(house, world, pars)
+        do_infections!(house, world, pars)
     end
 
     #println("infection II")
     for transp in world.transports, car in transp.cars
-        infection!(car, world, pars)
+        do_infections!(car, world, pars)
     end
     
     #println("experience")

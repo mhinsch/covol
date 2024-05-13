@@ -31,7 +31,7 @@ function recover!(agent, pars)
 end
 
 
-function disease!(agent, world, pars)
+function update_disease!(agent, world, pars)
     reaction = update_immune_system!(agent.immune_system, agent.virus.antigens, pars)
     
     if infected(agent)
