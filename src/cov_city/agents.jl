@@ -1,6 +1,6 @@
 using EnumX
 using Distributions
-using Base: @kwdef
+using CompositeStructs
 
 using DailySchedule
 using IEFModel
@@ -29,23 +29,38 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
 
 @enumx Activity home=1 prepare_work working prepare_leisure leisure travel stay_home none
 
-@kwdef mutable struct Agent
-    home 		:: PlaceG{Agent}
-    work 		:: PlaceG{Agent}
-    family 		:: Vector{Agent}	= []
-    friends 	:: Vector{Agent}	= []
-#    shops 		:: Vector{PlaceG{Agent}} = []
-    fun 		:: Vector{PlaceG{Agent}} = []
+
+@kwdef struct CityAgent{AGENT}
+    home 		:: PlaceG{AGENT}
+    work 		:: PlaceG{AGENT}
+    family 		:: Vector{AGENT}	= []
+    friends 	:: Vector{AGENT}	= []
+#    shops 		:: Vector{PlaceG{AGENT}} = []
+    fun 		:: Vector{PlaceG{AGENT}} = []
     
     schedule 	:: Schedule
     activity	:: Activity.T		= Activity.home
-    loc 		:: PlaceG{Agent}	= home
-    dest 		:: PlaceG{Agent}	= home
+    loc 		:: PlaceG{AGENT}	= home
+    dest 		:: PlaceG{AGENT}	= home
     plan 		:: Activity.T		= Activity.home
     t_next_act	:: Int				= 0
 #    "socio economic status"
 #    soc_status 	:: Int				= 0
 #    age :: Float64
+    "tendency to ignore covid experience"
+    recklessness :: Float64			= 0.0
+    "tendency to refuse official advice"
+    obstinacy 	:: Float64			= 0.0
+    "seen or experienced Covid"
+    cov_experience :: Float64		= 0.0
+#    "need to be present at job"
+#    job_presence :: Float64
+#    "ability to risk job"
+#    job_independence :: Float64
+end
+
+
+@kwdef struct IEFAgent
 
     "current health"
     health 		:: Float64			= 1.0
@@ -58,16 +73,12 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
     "prior physiological risk"
     risk 		:: Float64			= 0.0
     
-    "tendency to ignore covid experience"
-    recklessness :: Float64			= 0.0
-    "tendency to refuse official advice"
-    obstinacy 	:: Float64			= 0.0
-    "seen or experienced Covid"
-    cov_experience :: Float64		= 0.0
-#    "need to be present at job"
-#    job_presence :: Float64
-#    "ability to risk job"
-#    job_independence :: Float64
+end
+
+
+@composite @kwdef mutable struct Agent
+    CityAgent{Agent}...
+    IEFAgent...
 end
 
 
