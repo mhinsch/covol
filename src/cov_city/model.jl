@@ -169,7 +169,7 @@ function do_infections!(place, world, pars)
     for a in place.present
         if infectious(a)
             push!(inf, a)
-        elseif update_disease!(a)
+        elseif susceptible(a)
             push!(susc, a)
         end
     end
