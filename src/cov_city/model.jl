@@ -1,13 +1,3 @@
-macro static_var(init)
-  var = gensym()
-  Base.eval(__module__, :(const $var = $init))
-  quote
-    global $var
-    $var
-  end |> esc
-end
-
-
 function get_transports(world, p1, p2, act, pars)
     t1 = world.t_cache[p1.pos.x, p1.pos.y]
     t2 = world.t_cache[p2.pos.x, p2.pos.y]
@@ -158,13 +148,29 @@ function covid_experience!(agent, world, pars)
 end
 
 
+# assumes gas-like behaviour, i.e. constant rate of encounter
+function n_encounters(n_pairs, p_encounter)
+    # determine number of encounters
+    if n_pairs > 15 && p_encounter < 0.1
+        # good approximation for these numbers
+        return rand(Poisson(n_pairs * p_encounter))
+    end
+    
+    n_enc = 0
+    for i in 1:n_pairs
+        if rand() < p_encounter
+            n_enc += 1
+        end
+    end
+    
+    n_enc
+end
+
 # done globally for now
 # TODO take into account viral load
-function do_infections!(place, world, pars)
-    inf = @static_var Agent[]
-    susc = @static_var Agent[]
-    empty!(inf)
-    empty!(susc)
+function do_infections!(apply_encounter, place, world, pars)
+    inf = eltype(world.pop)[]
+    susc = eltype(world.pop)[]
     
     for a in place.present
         if infectious(a)
@@ -178,20 +184,7 @@ function do_infections!(place, world, pars)
         return
     end
 
-    n_pairs = length(inf) * length(susc)
-
-    # determine number of encounters
-    if n_pairs > 15 && pars.p_encounter < 0.1
-        # good approximation for these numbers
-        n_enc = rand(Poisson(n_pairs * pars.p_encounter))
-    else
-        n_enc = 0
-        for i in 1:n_pairs
-            if rand() < pars.p_encounter
-                n_enc += 1
-            end
-        end
-    end
+    n_enc = n_encounters(length(inf) * length(susc), pars.p_encounter)
 
     for e in n_enc
         ai = rand(inf)
@@ -199,7 +192,7 @@ function do_infections!(place, world, pars)
         mitigation = world.require_masks && rand() > ai.obstinacy ?
             pars.masks_effect : 0.0
             
-        if encounter!(ai, as, world.ief, mitigation, pars)
+        if apply_encounter(ai, as, mitigation)
             place.n_infections += 1
         end
     end

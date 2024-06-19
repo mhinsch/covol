@@ -1,25 +1,24 @@
 using EnumX
-using Distributions
-using CompositeStructs
 
 using DailySchedule
-using IEFModel
+
 
 @enumx PlaceT residential=1 school hospital supermarket work leisure transport nowhere
+
 
 struct Pos
     x :: Int
     y :: Int
 end
 
-mutable struct PlaceG{AG}
+mutable struct PlaceG{AGENT}
     type :: PlaceT.T
     pos :: Pos
-    present :: Vector{AG}
+    present :: Vector{AGENT}
     n_infections :: Int
 end
 
-PlaceG{AG}(t, p) where {AG} = PlaceG{AG}(t, p, [], 0)
+PlaceG{AGENT}(t, p) where {AGENT} = PlaceG{AGENT}(t, p, [], 0)
 
 isnowhere(place) = place.type == PlaceT.nowhere
 
@@ -60,34 +59,6 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
 end
 
 
-@kwdef struct IEFAgent
-
-    "current health"
-    health 		:: Float64			= 1.0
-    "immune status + history"
-    immune_system:: ImmuneSystem	= ImmuneSystem()
-    "virus population"
-    virus 		:: AGIEFVirus		= AGIEFVirus()
-    immune_strength :: Float64		= 1.0
-    # might not be needed / part of immune status
-    "prior physiological risk"
-    risk 		:: Float64			= 0.0
-    
-end
-
-
-@composite @kwdef mutable struct Agent
-    CityAgent{Agent}...
-    IEFAgent...
-end
-
-
-Agent(home, work, schedule) = Agent(;home, work, schedule)
-
-
-const Place = PlaceG{Agent}
-
-const Nowhere = Place(PlaceT.nowhere, Pos(-1, -1), [], 0)
 
 function change_loc!(agent, new_loc)
     if agent.loc != Nowhere
@@ -103,25 +74,24 @@ function assign_loc!(agent, loc)
     end
 end
 
-mutable struct Transport
-    p1 :: Place
-    p2 :: Place
+mutable struct TransportG{PLACE}
+    p1 :: PLACE
+    p2 :: PLACE
 
-    cars :: Vector{Place}
+    cars :: Vector{PLACE}
     car_cap :: Int
 end
 
 
-mutable struct World
+mutable struct World{PLACE, TRANSPORT, AGENT}
     # houses arranged spatially
-    map :: Matrix{Place}
+    map :: Matrix{PLACE}
     # houses by type
-    houses :: Vector{Vector{Place}}
-    pop :: Vector{Agent}
-    transports :: Vector{Transport}
-    t_cache :: Matrix{Vector{Transport}}
+    houses :: Vector{Vector{PLACE}}
+    pop :: Vector{AGENT}
+    transports :: Vector{TRANSPORT}
+    t_cache :: Matrix{Vector{TRANSPORT}}
     schedules :: Vector{Schedule{FlexibleDaySched}}
-    ief :: IEF
     
     alarm :: Float64
     isolation :: Bool
@@ -130,12 +100,9 @@ mutable struct World
 end
 
 
-mutable struct Model
-    world :: World
-    # overall week
-    week :: Int
-    # day of the week
-    day :: Int
-    # time of day in minutes
-    time :: Int
-end
+get_rand_work(world) = rand(world.houses[Int(PlaceT.work)])
+
+get_rand_school(world) = rand(world.houses[Int(PlaceT.school)])
+
+get_rand_schedule(world) = rand(world.schedules)
+

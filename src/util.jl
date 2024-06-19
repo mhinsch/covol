@@ -1,3 +1,19 @@
+# TODO move to util
+"""Sigmoid with f(0) = 1, f-> for higher x. Steepness determines slope of decrease, 
+offset width of curve."""
+function sigmoid(x, steepness, offset)
+    xs = x^steepness
+    1 - xs/(offset + xs)
+end
+
+
+#"Sigmoid with f(0)=0, f(1)=1. Linear for steepness=offset=1; higher offset increases (f^-1)(1/2)."
+#function sigmoid(x, steepness, offset)
+#    xs = x^(steepness * offset)
+#    xs/(xs + (1-xs^offset)^steepness)
+#end
+
+
 function remove_unsorted!(cont, obj)
     for (i, el) in enumerate(cont)
         if el == obj
@@ -82,3 +98,15 @@ function bresenham(f :: Function, x1::Int, y1::Int, x2::Int, y2::Int)
 	end
 
 end
+
+
+macro static_var(init)
+  var = gensym()
+  Base.eval(__module__, :(const $var = $init))
+  quote
+    global $var
+    $var
+  end |> esc
+end
+
+

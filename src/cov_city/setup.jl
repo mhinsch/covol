@@ -220,17 +220,8 @@ function setup_flexible_schedules!(world, pars)
 end
 
 
-function setup_ief!(world, pars)
-    world.ief = IEFModel.setup_ief(pars)
-end
 
-function setup_agent!(home, age, world, pars)
-    work = age<18 ?
-        rand(world.houses[Int(PlaceT.school)]) :
-        rand(world.houses[Int(PlaceT.work)])
-    agent = Agent(home, work, rand(world.schedules))
-    add_agent!(home, agent)
-    
+function setup_agent!(agent, pars)
     agent.risk = rand() < pars.p_at_risk ? 
         rand() * (pars.risk_range[2]-pars.risk_range[1]) + pars.risk_range[1] :
         0.0
@@ -242,11 +233,7 @@ function setup_agent!(home, age, world, pars)
         push!(agent.fun, rand(world.houses[Int(PlaceT.leisure)]))
     end
     
-    agent.virus = NoVirus
-    
-    push!(world.pop, agent)
-    
-    agent
+    nothing
 end
 
 
@@ -335,47 +322,4 @@ function setup_rand_friends!(world, pars)
 end
 
 
-function initial_infected!(world, pars)
-    if pars.mixed_ini_inf
-        for i in 1:pars.n_infected
-            while true
-                inf = rand(world.pop)
-                if !infected(inf) 
-                    initial_infect!(inf, pars)
-                    break
-                end
-            end
-        end
-    else
-        pat0 = rand(world.pop)
-        initial_infect!(pat0, pars)
-        for i in 1:(pars.n_infected-1)
-            while true
-                inf = rand(world.pop)
-                if !infected(inf) 
-                    infect!(inf, pat0.virus, world.ief, pars)
-                    break
-                end
-            end
-        end
-    end
-end
 
-
-function setup_model(pars)
-    world = create_world(pars)
-    setup_transport!(world, pars)
-    setup_flexible_schedules!(world, pars)
-    setup_ief!(world, pars)
-    if pars.pop_file == ""
-        create_synth_agents!(world, pop_size(pars), pars)
-        setup_family_in_house!(world, pars)
-    else
-        pf = open(pars.pop_file, "r")
-        agents, houses = load_pop_from_file(pf)
-        setup_pre_pop!(world, agents, houses, pars)
-    end
-    setup_rand_friends!(world, pars)
-    initial_infected!(world, pars)
-    Model(world, 0, 1, 0)
-end
