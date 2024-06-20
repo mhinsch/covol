@@ -2,8 +2,7 @@ function get_transports(world, p1, p2, act, pars)
     t1 = world.t_cache[p1.pos.x, p1.pos.y]
     t2 = world.t_cache[p2.pos.x, p2.pos.y]
    
-    inters = @static_var Transport[]
-    empty!(inters)
+    inters = eltype(world.transports)[]
     
     for t in t1
         if t in t2

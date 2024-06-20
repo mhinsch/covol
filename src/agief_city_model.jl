@@ -3,11 +3,33 @@ using CompositeStructs
 using IEFModel
 
 
-@composite @kwdef mutable struct Agent
-    CityAgent{Agent}...
-    IEFAgent...
+include("util.jl")
+include("ief_model/infection.jl")
+include("agab/antigen_antibody.jl")
+include("agab/immune.jl")
+include("agab/params.jl")
+include("agab_ief_model/agent.jl")
+include("agab_ief_model/virus.jl")
+include("agab_ief_model/disease.jl")
+include("city_world/agents.jl")
+include("city_world/model.jl")
+include("city_world/setup.jl")
+include("city_world/params.jl")
+include("city_world/update.jl")
+include("city_world/activity.jl")
+
+
+@composite @kwdef mutable struct AllParams
+    Params...
+    IEFParams...
+    AgabParams...
 end
 
+
+@composite @kwdef mutable struct Agent
+    CityAgent{Agent}...
+    IEFAgent{AGIEFVirus}...
+end
 
 Agent(home, work, schedule) = Agent(;home, work, schedule)
 
@@ -22,7 +44,7 @@ const Transport = TransportG{Place}
 mutable struct AGIEFModel
     world :: World{Place, Transport, Agent}
     # overall week
-    week :: InStructst
+    week :: Int
     # day of the week
     day :: Int
     # time of day in minutes
@@ -37,13 +59,9 @@ end
 
 
 function create_agent(world, home, age, pars)
-    work = age<18 ? get_rand_school(world) : get_rand_work(world)
-    schedule = get_rand_schedule(world)
-    
+    work, schedule = create_agent_work(world, age, pars)
     agent = Agent(home, work, schedule)
-    add_agent!(agent.home, agent)
-    
-    setup_agent!(agent, pars)
+    setup_agent!(world, agent, pars)
     
     agent.virus = NoVirus
     
@@ -79,21 +97,24 @@ end
 
 
 function setup_model(pars)
-    world = create_world(pars)
+    world = World{Place, Transport, Agent}([;;], [], [], [], [;;], [], 0.0, false, false, false) 
+    setup_world!(world, pars)
     setup_transport!(world, pars)
     setup_flexible_schedules!(world, pars)
-    setup_ief!(world, pars)
     if pars.pop_file == ""
-        create_synth_agents!(world, pop_size(pars), pars)
+        create_synth_agents!(create_agent, world, pop_size(pars), pars)
         setup_family_in_house!(world, pars)
     else
         pf = open(pars.pop_file, "r")
         agents, houses = load_pop_from_file(pf)
-        setup_pre_pop!(world, agents, houses, pars)
+        setup_pre_pop!(create_agent, world, agents, houses, pars)
     end
     setup_rand_friends!(world, pars)
-    initial_infected!(world, pars)
-    Model(world, 0, 1, 0)
+    model = AGIEFModel(world, 0, 1, 0, IEF([], []))
+    setup_ief!(model, pars)
+    initial_infected!(world, model.ief, pars)
+    
+    model
 end
 
     
@@ -119,7 +140,7 @@ function step!(model, pars)
     #println("disease")
     #if model.time % pars.dt_disease == 0
         for agent in world.pop
-            update_disease!(agent, world, pars)
+            update_disease!(agent, model, pars)
         end
     #end
 

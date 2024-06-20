@@ -11,8 +11,8 @@ function get_rnd_empty_house(houses)
 end
 
 
-function create_square_map(pars)
-    map = [ Place(PlaceT.nowhere, Pos(x, y)) for x in 1:pars.x_size, y in 1:pars.y_size ]
+function create_square_map(PLACE, pars)
+    map = [ PLACE(PlaceT.nowhere, Pos(x, y)) for x in 1:pars.x_size, y in 1:pars.y_size ]
 end
 
 
@@ -36,57 +36,54 @@ n_residential(pars) = n_houses(pars) - n_schools(pars) - pars.n_hospitals - pars
     n_commercial(pars) - n_leisure(pars)
     
 
-function create_world(pars)
-    map = create_square_map(pars)
+function setup_world!(world, pars)
+    world.map = create_square_map(eltype(world.map), pars)
     
-    # houses by type
-    houses = Vector{Vector{Place}}()
-
     for i in 1:n_instances(PlaceT.T)-1
-        push!(houses, Vector{Place}())
+        push!(world.houses, Vector{Place}())
     end
     
     for i in 1:n_schools(pars)
-        h = get_rnd_empty_house(map)
+        h = get_rnd_empty_house(world.map)
         h.type = PlaceT.school
-        push!(houses[Int(PlaceT.school)], h)
+        push!(world.houses[Int(PlaceT.school)], h)
     end
 
     for i in 1:pars.n_hospitals
-        h = get_rnd_empty_house(map)
+        h = get_rnd_empty_house(world.map)
         h.type = PlaceT.hospital
-        push!(houses[Int(PlaceT.hospital)], h)
+        push!(world.houses[Int(PlaceT.hospital)], h)
     end
 
     for i in 1:pars.n_smarkets
-        h = get_rnd_empty_house(map)
+        h = get_rnd_empty_house(world.map)
         h.type = PlaceT.supermarket
-        push!(houses[Int(PlaceT.supermarket)], h)
+        push!(world.houses[Int(PlaceT.supermarket)], h)
     end
 
     for i in 1:n_commercial(pars)
-        h = get_rnd_empty_house(map)
+        h = get_rnd_empty_house(world.map)
         h.type = PlaceT.work
-        push!(houses[Int(PlaceT.work)], h)
+        push!(world.houses[Int(PlaceT.work)], h)
     end
 
     for i in 1:n_leisure(pars)
-        h = get_rnd_empty_house(map)
+        h = get_rnd_empty_house(world.map)
         h.type = PlaceT.leisure
-        push!(houses[Int(PlaceT.leisure)], h)
+        push!(world.houses[Int(PlaceT.leisure)], h)
     end
 
     # everything else is residential
-    for h in map
+    for h in world.map
         if h.type == PlaceT.nowhere
             h.type = PlaceT.residential
         end
-        push!(houses[Int(PlaceT.residential)], h)
+        push!(world.houses[Int(PlaceT.residential)], h)
     end
 
-    t_cache = [ Transport[] for x in 1:pars.x_size, y in 1:pars.y_size ]
-
-    World(map, houses, [], [], t_cache, [], IEF([], []), 0.0, false, false, false) 
+    world.t_cache = [ eltype(world.transports)[] for x in 1:pars.x_size, y in 1:pars.y_size ]
+    
+    nothing
 end
 
 
@@ -220,8 +217,18 @@ function setup_flexible_schedules!(world, pars)
 end
 
 
+function create_agent_work(world, age, pars)
+    work = age<18 ? get_rand_school(world) : get_rand_work(world)
+    schedule = get_rand_schedule(world)
+    
+    work, schedule
+end
+    
 
-function setup_agent!(agent, pars)
+function setup_agent!(world, agent, pars)
+    add_agent!(agent.home, agent)
+    push!(world.pop, agent)
+    
     agent.risk = rand() < pars.p_at_risk ? 
         rand() * (pars.risk_range[2]-pars.risk_range[1]) + pars.risk_range[1] :
         0.0
@@ -237,7 +244,7 @@ function setup_agent!(agent, pars)
 end
 
 
-function create_synth_agents!(world, n_agents, pars)
+function create_synth_agents!(createf, world, n_agents, pars)
     # simplistic home, work
     # TODO family size distribution
     # TODO non-residential homes (e.g. care homes)
@@ -248,13 +255,13 @@ function create_synth_agents!(world, n_agents, pars)
     println("creating $n_agents agents")
     for i in 1:n_agents
         home = rand(world.houses[Int(PlaceT.residential)])
-        setup_agent!(home, rand() < pars.prop_children, world, pars)
+        createf(world, home, rand() < pars.prop_children ? rand(1:18) : rand(19:80), pars)
     end
     # TODO shops 
 end
 
 
-function setup_pre_pop!(world, agents, houses, pars)
+function setup_pre_pop!(createf, world, agents, houses, pars)
     res_houses = world.houses[Int(PlaceT.residential)]
     rnd_indices = 1:length(res_houses) |> collect |> shuffle
     
@@ -269,7 +276,7 @@ function setup_pre_pop!(world, agents, houses, pars)
         house = res_houses[rnd_indices[i]]
         for id in residents
             age = agents[id][1]
-            agent = setup_agent!(house, age, world, pars)
+            agent = createf(world, house, age, pars)
             agids_by_obj[agent] = id
             ags_by_id[id] = agent
         end
