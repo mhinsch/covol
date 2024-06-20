@@ -31,7 +31,7 @@ function recover!(agent, pars)
 end
 
 
-function update_disease!(agent, world, pars)
+function update_disease!(agent, ief, pars)
     reaction = update_immune_system!(agent.immune_system, agent.virus.antigens, pars)
     
     if infected(agent)
@@ -42,7 +42,7 @@ function update_disease!(agent, world, pars)
         elseif !sick(agent) && rand() < pars.p_sympt
             symptomatic!(agent, pars)
         end
-        update_virus!(agent.virus, world.ief, pars)
+        update_virus!(agent.virus, ief, pars)
     end
     
     nothing

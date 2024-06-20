@@ -140,7 +140,7 @@ function step!(model, pars)
     #println("disease")
     #if model.time % pars.dt_disease == 0
         for agent in world.pop
-            update_disease!(agent, model, pars)
+            update_disease!(agent, model.ief, pars)
         end
     #end
 
