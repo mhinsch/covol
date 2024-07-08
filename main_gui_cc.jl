@@ -12,7 +12,7 @@ include("cov_city.jl")
 include("analysis_cc.jl")
 include("agab_sample.jl")
 
-include("src/cov_city/gui/render.jl")
+include("src/city_world/gui/render.jl")
 
 using SimpleGraph
 

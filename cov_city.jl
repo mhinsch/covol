@@ -1,5 +1,3 @@
-using CompositeStructs
-
 include("main_util.jl")
 
 add_to_load_path!(joinpath(@__DIR__, "src/basic_ief"))
