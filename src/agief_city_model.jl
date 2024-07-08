@@ -15,7 +15,6 @@ include("city_world/agents.jl")
 include("city_world/model.jl")
 include("city_world/setup.jl")
 include("city_world/params.jl")
-include("city_world/update.jl")
 include("city_world/activity.jl")
 
 
