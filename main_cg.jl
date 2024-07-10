@@ -2,6 +2,11 @@ include("main_util.jl")
 include("cov_graph.jl")
 include("analysis_cg.jl")
 
+
+# TODO
+# use main.jl
+
+
 using Random
 
 function setup_logs()

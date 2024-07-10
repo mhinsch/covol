@@ -56,6 +56,10 @@ remove_agent!(place, agent) = remove_unsorted!(place.present, agent)
 #    job_presence :: Float64
 #    "ability to risk job"
 #    job_independence :: Float64
+    # might not be needed / part of immune status
+    "prior physiological risk"
+    risk 		:: Float64			= 0.0
+    
 end
 
 

@@ -7,10 +7,6 @@
     "virus population"
     virus 		:: VIRUS			= VIRUS()
     immune_strength :: Float64		= 1.0
-    # might not be needed / part of immune status
-    "prior physiological risk"
-    risk 		:: Float64			= 0.0
-    
 end
 
 
