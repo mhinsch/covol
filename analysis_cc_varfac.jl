@@ -33,8 +33,8 @@ end
     @for person in world.pop begin
         @stat("n_inf", CountAcc) <| (infected(person))
         @stat("n_sick", CountAcc) <| (sick(person))
-        #@stat("n_rec", CountAcc) <| (length(person.immune) > 0)
-        #@stat("n_imm", MVA, MMA, HistAcc(0.0, 1.0)) <| Float64(length(person.immune))
+        @stat("n_imm", MVA, MMA, HistAcc(0.0, 1.0)) <| Float64(length(person.immune.immunities))
+        @stat("n_virus", MVA, MMA, HistAcc(0.0, 1.0)) <| Float64(length(person.viruses))
         @stat("exp", MVA, MMA) <| person.cov_experience
 # TODO activity of most active immunity
 #        @if infected(person) @stat("imm", MVA, MMA) <| 
@@ -47,5 +47,5 @@ end
 
 
 function ticker(model, data)
-    println("day: ", model.day, "\ttime: ", model.time/60, "\t", data.n_commute.n)
+    println("day: ", model.day, "\ttime: ", model.time/60, "\timm: ", data.n_imm.mean, "\t", data.n_imm.max, "\tvirus: ", data.n_virus.mean, "\t", data.n_virus.max)
 end

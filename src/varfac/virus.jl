@@ -10,7 +10,7 @@ Virus() = Virus([])
 
 
 function mutate_virus(virus, dist)
-    Virus(virus.phenotype .+ rand(MvNormal(ScalMat(length(virus), dist))))
+    Virus(virus.phenotype .+ rand(MvNormal(ScalMat(length(virus.phenotype), dist))))
 end
 
 

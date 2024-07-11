@@ -1,9 +1,9 @@
 # TODO move to util
 """Sigmoid with f(0) = 1, f-> for higher x. Steepness determines slope of decrease, 
-offset width of curve."""
+offset width of curve. f(offset) = 0.5"""
 function sigmoid(x, steepness, offset)
     xs = x^steepness
-    1 - xs/(offset + xs)
+    1 - xs/(offset^steepness + xs)
 end
 
 
