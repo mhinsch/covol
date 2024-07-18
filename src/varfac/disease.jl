@@ -26,7 +26,8 @@ end
 
 # TODO: effect of competition or cross-over
 function prob_mutate(match, nviruses, pars)
-    sigmoid((1.0-match), pars.mut_steep, pars.mut_offs) * pars.max_prob_mut
+    prob_mut_sel = sigmoid((1.0-match), pars.mut_steep, pars.mut_offs) * pars.max_prob_mut
+    1.0 - (1.0 - prob_mut_sel) * (1.0 - pars.base_prob_mut)
 end
 
 # TODO: should this *modify* or *add*?

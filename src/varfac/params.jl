@@ -9,6 +9,7 @@ using Parameters
     
     min_match_req :: Float64	= 0.5
     immune_dist :: Float64		= 0.001
+    max_imm_age :: Float64		= 4 * 24 * 200
     
     heal_steep :: Float64		= 3.0
     heal_offs :: Float64		= 0.1
@@ -17,6 +18,7 @@ using Parameters
     mut_steep :: Float64		= 3.0
     mut_offs :: Float64			= 0.1
     max_prob_mut :: Float64		= 0.1
+    base_prob_mut :: Float64	= 0.01
     mutate_dist :: Float64		= 0.1
 end
     

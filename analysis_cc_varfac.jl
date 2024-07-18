@@ -47,5 +47,5 @@ end
 
 
 function ticker(model, data)
-    println("day: ", model.day, "\ttime: ", model.time/60, "\timm: ", data.n_imm.mean, "\t", data.n_imm.max, "\tvirus: ", data.n_virus.mean, "\t", data.n_virus.max)
+    println("time: ", model.week, ":", model.day, ":", model.time/60, "\timm: ", data.n_imm.mean, "\t", data.n_imm.max, "\tvirus: ", data.n_virus.mean, "\t", data.n_virus.max)
 end

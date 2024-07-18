@@ -2,11 +2,12 @@ using Distributions
 using PDMats:ScalMat
 
 
-struct Immunity
+mutable struct Immunity
     phenotype :: Vector{Float64}
+    age :: Int
 end
 
-Immunity() = Immunity([])
+Immunity() = Immunity([], 0)
 
 
 struct Immune
@@ -41,7 +42,7 @@ end
 
 function create_immunity!(immune, virus, pars)
     imm = virus.phenotype .+ rand(MvNormal(ScalMat(length(virus.phenotype), pars.immune_dist)))
-    push!(immune.immunities, Immunity(imm))
+    push!(immune.immunities, Immunity(imm, 0))
     nothing
 end
 
@@ -49,6 +50,10 @@ end
 # find best match for each infecting strain
 # add new immunity if no sufficient match exists
 function update_immune_system!(immune, viruses, pars)
+    for imm in immune.immunities
+        imm.age += 1
+    end
+    
     matches = Float64[]
     for v in viruses
         best_i, best_match = find_best_match(immune, v, pars)
@@ -56,6 +61,14 @@ function update_immune_system!(immune, viruses, pars)
         push!(matches, best_match)
         if best_match < pars.min_match_req
             create_immunity!(immune, v, pars)
+        else
+            immune.immunities[best_i].age = 0
+        end
+    end
+    
+    for i in length(immune.immunities):-1:1
+        if immune.immunities[i].age >= pars.max_imm_age
+            remove_unsorted_at!(immune.immunities, i)
         end
     end
     
