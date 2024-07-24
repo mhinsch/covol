@@ -21,15 +21,15 @@ include("city_world/activity.jl")
 end
 
 
-@composite @kwdef mutable struct Agent
-    CityAgent{Agent}...
+@composite @kwdef mutable struct VarfacCityAgent
+    CityAgent{VarfacCityAgent}...
     VarfacAgent...
 end
 
-Agent(home, work, schedule) = Agent(;home, work, schedule)
+VarfacCityAgent(home, work, schedule) = VarfacCityAgent(;home, work, schedule)
 
 
-const Place = PlaceG{Agent}
+const Place = PlaceG{VarfacCityAgent}
 
 const Nowhere = Place(PlaceT.nowhere, Pos(-1, -1), [], 0)
 
@@ -37,7 +37,7 @@ const Transport = TransportG{Place}
 
 
 mutable struct VarfacModel
-    world :: World{Place, Transport, Agent}
+    world :: World{Place, Transport, VarfacCityAgent}
     # overall week
     week :: Int
     # day of the week
@@ -49,7 +49,7 @@ end
 
 function create_agent(world, home, age, pars)
     work, schedule = create_agent_work(world, age, pars)
-    agent = Agent(home, work, schedule)
+    agent = VarfacCityAgent(home, work, schedule)
     setup_agent!(world, agent, pars)
     
     agent
@@ -84,7 +84,7 @@ end
 
 
 function setup_model(pars)
-    world = World{Place, Transport, Agent}([;;], [], [], [], [;;], [], 0.0, false, false, false) 
+    world = World{Place, Transport, VarfacCityAgent}([;;], [], [], [], [;;], [], 0.0, false, false, false) 
     setup_world!(world, pars)
     setup_transport!(world, pars)
     setup_flexible_schedules!(world, pars)
