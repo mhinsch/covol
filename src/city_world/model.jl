@@ -13,11 +13,13 @@ function get_transports(world, p1, p2, act, pars)
     inters
 end
 
-cov_wariness(agent, caution) = (agent.cov_experience * (1.0 - agent.recklessness)) ^ (1/caution)
+cov_wariness(agent, caution) = 
+    (agent.cov_experience * (1.0 - agent.recklessness)) ^ (1/caution * (1.0-agent.risk))
 
 
 function decide_home2leisure(agent, world, pars, t)
-    if (sick(agent) && world.isolation && rand() > agent.obstinacy) ||
+    if too_sick(agent, pars) ||
+        (sick(agent, pars) && world.isolation && rand() > agent.obstinacy) ||
         rand() < cov_wariness(agent, pars.caution_leisure) ||
         (world.lockdown && rand() > agent.obstinacy)
         agent.activity = Activity.stay_home
@@ -45,7 +47,8 @@ function decide_leisure2home(agent, world, pars, t)
 end
 
 function decide_home2work(agent, world, pars, t)
-    if (sick(agent) && world.isolation && rand() > agent.obstinacy) ||
+    if too_sick(agent, pars) ||
+        (sick(agent, pars) && world.isolation && rand() > agent.obstinacy) ||
         rand() < cov_wariness(agent, pars.caution_work) ||
         (world.lockdown && rand() > agent.obstinacy)
         agent.activity = Activity.stay_home
@@ -133,14 +136,14 @@ end
 function covid_experience!(agent, world, pars)
     delta = - agent.cov_experience * pars.exp_decay 
     
-    if sick(agent)
+    if sick(agent, pars)
         delta += (1.0 - agent.cov_experience) * pars.exp_self_weight
     end
     
-    ps = length(agent.family) == 0 ? 0.0 : count(sick, agent.family) / length(agent.family)
+    ps = length(agent.family) == 0 ? 0.0 : count(a->sick(a, pars), agent.family) / length(agent.family)
     delta += (1.0 - agent.cov_experience) * pars.exp_family_weight * ps
 
-    ps = count(sick, agent.friends) / length(agent.friends)
+    ps = count(a->sick(a, pars), agent.friends) / length(agent.friends)
     delta += (1.0 - agent.cov_experience) * pars.exp_friends_weight * ps
     
     agent.cov_experience = max(min(agent.cov_experience + delta, 1.0), 0.0)
@@ -200,7 +203,7 @@ end
 
 
 function check_policies!(world, pars)
-    prop_inf = count(sick, world.pop) / length(world.pop)
+    prop_inf = count(a -> sick(a, pars), world.pop) / length(world.pop)
     
     if prop_inf > pars.alarm_inc_thresh
         world.alarm += (1.0 - world.alarm) * pars.alarm_inc_d

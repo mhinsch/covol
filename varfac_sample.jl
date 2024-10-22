@@ -12,6 +12,36 @@ function gene_dist(aga::VarfacCityAgent, agb::VarfacCityAgent)
     gene_dist(rand(aga.viruses).phenotype, rand(agb.viruses).phenotype)
 end
 
+
+function sample_immunity(pop, n, pars)
+    imm = zeros(n)
+    imm_self = zeros(n)
+    
+    count = 0
+    # agents should be in random order
+    for agent in pop
+        if infected(agent)
+            count += 1
+            # random virus from infected individual
+            v = rand(agent.viruses)
+            # immune system of random other individual
+            immune = rand(pop).immune
+            _, imm[count] = find_best_match(immune, v, pars)
+            _, imm_self[count] = find_best_match(agent.immune, v, pars)
+            
+            if count == n # we have enough
+                break
+            end
+        end
+    end
+    
+    resize!(imm, n)
+    resize!(imm_self, n)
+    
+    imm, imm_self
+end
+
+
 "Sort genomes by frequency and calculate distance to most frequent one."
 function sample_virus_genes(pop, compare = nothing)
     cdict = Dict{typeof(pop[1].virus.antigens), Int}() 
@@ -44,11 +74,11 @@ end
 function hamming_dists(pop, n)
     inf_pop = [a for a in pop if infected(a)]
     
-    dists = Float64[]
-    
     if length(inf_pop) <= 1
-        return dists
+        return zeros(2)
     end
+    
+    dists = Float64[]
     
     for i in 1:n
         ag_a = rand(inf_pop)

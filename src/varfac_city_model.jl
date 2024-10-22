@@ -15,6 +15,7 @@ include("city_world/params.jl")
 include("city_world/activity.jl")
 
 
+"Simulation parameters"
 @composite @kwdef mutable struct AllParams
     Params...
     VarfacParams...

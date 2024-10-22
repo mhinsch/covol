@@ -1,6 +1,7 @@
 include("main_util.jl")
 include("src/varfac_city_model.jl")
 include("analysis_cc_varfac.jl")
+include("varfac_sample.jl")
 
 include("main.jl")
 

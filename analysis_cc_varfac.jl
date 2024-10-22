@@ -32,17 +32,19 @@ end
 
     @for person in world.pop begin
         @stat("n_inf", CountAcc) <| (infected(person))
-        @stat("n_sick", CountAcc) <| (sick(person))
+        @stat("n_sick", CountAcc) <| (sick(person, pars))
         @stat("n_imm", MVA, MMA, HistAcc(0.0, 1.0)) <| Float64(length(person.immune.immunities))
-        @stat("n_virus", MVA, MMA, HistAcc(0.0, 1.0)) <| Float64(length(person.viruses))
+        @stat("n_virus", MVA, MMA, HistAcc(1.0, 1.0)) <| Float64(length(person.viruses))
+        @stat("health", MVA, HistAcc(0.0, 0.05, 1.0)) <| person.health
+        @stat("duration", MVA, HistAcc(0.01, 2.0*24*4)) <| Float64(person.inf_duration)
         @stat("exp", MVA, MMA) <| person.cov_experience
 # TODO activity of most active immunity
 #        @if infected(person) @stat("imm", MVA, MMA) <| 
     end
 
-    #@for d in hamming_dists(world.pop, 1000) begin
-    #    @stat("hamming", MVA, HistAcc(0.0, 0.01, 1.0, count_above_max=true)) <| d/pars.max_antigen
-    #end
+    @for d in hamming_dists(world.pop, 1000) begin
+        @stat("hamming", MVA, HistAcc(0.0, pars.mutate_dist/7)) <| d
+    end
 end
 
 
